@@ -1,6 +1,7 @@
 import express from "express";
 import axios from "axios";
 import Encoding from "encoding-japanese";
+import { Character, Status } from "./adapters/types";
 
 const app = express();
 const port = 3000;
@@ -71,6 +72,7 @@ function readCharacter(pageHtml: string): Character {
     const slots: Status[] = [];
     let hp = 0;
     let maxHp = 0;
+    let tempHp = 0;
     let ac = 0;
 
     while (lineIndex++ <= lines.length && iterations++ < 1000) {
@@ -101,10 +103,11 @@ function readCharacter(pageHtml: string): Character {
                 break;
             }
             case "hp": {
-                const match = line.match(/^▼HP:(\d+)\/(\d+)/);
+                const match = line.match(/^▼HP:(\d+)\/(\d+) ▼一時HP:(\d+)/);
                 if (match) {
                     hp = parseInt(match[1], 10);
                     maxHp = parseInt(match[2], 10);
+                    tempHp = parseInt(match[3], 10);
                     state = "commands";
                 }
                 break;
@@ -114,6 +117,24 @@ function readCharacter(pageHtml: string): Character {
                     commands.push(line);
                     while (lineIndex++ < lines.length) {
                         line = lines[lineIndex];
+                        
+                        const attributeMatch = line.match(/^1d20(.+) ▼【(.+)】能力値判定$/);
+                        if (attributeMatch) {
+                            const label = attributeMatch[2];
+                            let value = attributeMatch[1];
+                            if (value.startsWith("+")) value = value.substring(1);
+                            character.data.params.push({ label, value });
+                        }
+
+                        const perceptionMatch = line.match(/^1d20(.+) ▼〈知覚〉【判】技能判定$/);
+                        if (perceptionMatch) {
+                            let value = parseInt(perceptionMatch[1]);
+                            if (!isNaN(value)) {
+                                const passivePerception = (value + 10).toString();
+                                character.data.params.push({ label: "自動知覚", value: passivePerception });
+                            }
+                        }
+
                         if (line.startsWith("■特徴・特性")) {
                             lineIndex--;
                             state = "slots";
@@ -137,7 +158,7 @@ function readCharacter(pageHtml: string): Character {
                             if (amount == 0) continue;
 
                             slots.push({ 
-                                label: `Lv${level}呪文スロット`, 
+                                label: `スロット${level}`, 
                                 value: amount, 
                                 max: amount 
                             });
@@ -151,6 +172,7 @@ function readCharacter(pageHtml: string): Character {
             case "end": {
                 character.data.commands = commands.join("\n");
                 character.data.status.push({ label: "HP", value: hp, max: maxHp });
+                character.data.status.push({ label: "一時HP", value: tempHp, max: 0 });
                 character.data.status.push({ label: "AC", value: ac, max: 0 });
                 if (slots.length > 0) {
                     character.data.status.push(...slots);
@@ -169,28 +191,3 @@ app.listen(port, () => {
 
 type States = "name" | "initiative" | "ac" | "hp" | "commands" | "slots" | "end";
 
-type Character = {
-    kind: "character";
-    data: CharacterData
-}
-
-type CharacterData = {
-    name: string;
-    initiative: number;
-    externalUrl: string;
-    iconUrl: string;
-    commands: string;
-    status: Status[];
-    params: Param[];
-}
-
-type Status = {
-    label: string;
-    value: number;
-    max: number;
-}
-
-type Param = {
-    label: string;
-    value: string;
-}
