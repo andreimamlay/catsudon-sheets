@@ -343,7 +343,7 @@ function readSkills($: cheerio.CheerioAPI, character: Character, chatPalette: Ch
         const chatPaletteValue = value || "0";
         const additionalSign = !value.startsWith("-") ? "+" : "";
 
-        chatPalette.savingThrows.push(`1d20${additionalSign}${chatPaletteValue} 【${skill.label}】技能判定`);
+        chatPalette.skills.push(`1d20${additionalSign}${chatPaletteValue} 【${skill.label}】技能判定`);
     }
 }
 
