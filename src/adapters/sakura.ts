@@ -1,6 +1,6 @@
 import axios from "axios";
 import Encoding from "encoding-japanese";
-import { Adapter, CanConvert, Character, ChatPalette, Convert } from "./types";
+import { Adapter, CanConvert, CCFoliaCharacter, ChatPalette, Convert } from "./types";
 import * as cheerio from "cheerio"
 
 const decoder = new TextDecoder();
@@ -11,7 +11,7 @@ const canConvert: CanConvert = (url: string): boolean => {
 
 const convert: Convert = async (characterSheetUrl: string) => {
     const characterSheetData = await download(characterSheetUrl);
-    const character: Character = {
+    const character: CCFoliaCharacter = {
         kind: "character",
         data: {
             name: "",
@@ -163,7 +163,7 @@ const CssSelectors = {
 }
 
 
-function readStatus($: cheerio.CheerioAPI, character: Character, chatPalette: ChatPalette) {
+function readStatus($: cheerio.CheerioAPI, character: CCFoliaCharacter, chatPalette: ChatPalette) {
     character.data.name = $(CssSelectors.characterName).text();
 
     const initiativeBonus = parseInt($(CssSelectors.initiative).text());
@@ -204,7 +204,7 @@ function readStatus($: cheerio.CheerioAPI, character: Character, chatPalette: Ch
         max: 2
     });
 }
-function readSpellSlots($: cheerio.CheerioAPI, character: Character, chatPalette: ChatPalette) {
+function readSpellSlots($: cheerio.CheerioAPI, character: CCFoliaCharacter, chatPalette: ChatPalette) {
     for (let slotIndex = 0; slotIndex < CssSelectors.slots.length; slotIndex++) {
         const slotSelectors = CssSelectors.slots[slotIndex];
         const total = parseInt($(slotSelectors.total).text());
@@ -220,7 +220,7 @@ function readSpellSlots($: cheerio.CheerioAPI, character: Character, chatPalette
     }
 }
 
-function readParameters($: cheerio.CheerioAPI, character: Character, chatPalette: ChatPalette) {
+function readParameters($: cheerio.CheerioAPI, character: CCFoliaCharacter, chatPalette: ChatPalette) {
     for (let abilityScoreIndex = 0; abilityScoreIndex < CssSelectors.abilityScores.length; abilityScoreIndex++) {
         const attribute = CssSelectors.abilityScores[abilityScoreIndex];
         let value = $(attribute.selector).text().trim();
@@ -282,7 +282,7 @@ function toCommands(chatPalette: ChatPalette): string {
         .join("\n");
 }
 
-function readAttacks($: cheerio.CheerioAPI, character: Character, chatPalette: ChatPalette) {
+function readAttacks($: cheerio.CheerioAPI, character: CCFoliaCharacter, chatPalette: ChatPalette) {
     for (let attackIndex = 0; attackIndex < CssSelectors.attacks.length; attackIndex++) {
         const attackRow = CssSelectors.attacks[attackIndex];
         const row = $(attackRow);
@@ -337,7 +337,7 @@ function readAttacks($: cheerio.CheerioAPI, character: Character, chatPalette: C
     }
 }
 
-function readSkills($: cheerio.CheerioAPI, character: Character, chatPalette: ChatPalette) {
+function readSkills($: cheerio.CheerioAPI, character: CCFoliaCharacter, chatPalette: ChatPalette) {
     for (let skillIndex = 0; skillIndex < CssSelectors.skills.length; skillIndex++) {
         const skill = CssSelectors.skills[skillIndex];
         

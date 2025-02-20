@@ -4,30 +4,30 @@ export type Adapter = {
 }
 
 export type CanConvert = (characterSheetUrl: string) => boolean;
-export type Convert = (characterSheetUrl: string) => Promise<Character>;
+export type Convert = (characterSheetUrl: string) => Promise<CCFoliaCharacter>;
 
-export type Character = {
+export type CCFoliaCharacter = {
     kind: "character";
-    data: CharacterData
+    data: CCFoliaCharacterData
 }
 
-export type CharacterData = {
+export type CCFoliaCharacterData = {
     name: string;
     initiative: number;
     externalUrl: string;
     iconUrl: string;
     commands: string;
-    status: Status[];
-    params: Param[];
+    status: CCFoliaStatus[];
+    params: CCFoliaParam[];
 }
 
-export type Status = {
+export type CCFoliaStatus = {
     label: string;
     value: number;
     max: number;
 }
 
-export type Param = {
+export type CCFoliaParam = {
     label: string;
     value: string;
 }

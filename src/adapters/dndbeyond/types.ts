@@ -1,17 +1,17 @@
-type ApiResponse = {
+export type DndBeyondApiResponse = {
     id: number;
     success: boolean;
     message: string;
-    data?: Data
+    data?: DndBeyondCharacterData
 }
 
-type Data = {
+export type DndBeyondCharacterData = {
     username: string;
     readonlyUrl: string;
     name: string;
     baseHitPoints: number;
     temporaryHitPoints: number;
-    stats: Stat[];
+    stats: [Stat<1>, Stat<2>, Stat<3>, Stat<4>, Stat<5>, Stat<6>];
     inventory: Equipment[];
     classes: Class[];
     modifiers: {
@@ -24,54 +24,59 @@ type Data = {
     }
 }
 
-type Stat = {
-    id: number;
+export type Stat<id> = {
+    id: id;
     value: number;
 }
 
-type Equipment = {
+export type Equipment = {
     definition: EquipmentDefinition;
 }   
 
-type EquipmentDefinition = {
+export type EquipmentDefinition = {
     name: string;
     damage: Damage | null;
 }
 
-type Class = {
+export type Class = {
     level: number;
+    isStartingClass: boolean;
     definition: ClassDefinition;
 }
 
-type ClassDefinition = {
+export type ClassDefinition = {
     hitDice: number;
     spellRules: SpellRules | null;
 }
 
-type SpellRules = {
+export type SpellRules = {
     levelSpellSlots: number[][]; // classLevel[slotLevel], level = index
 }
 
-type Damage = {
+export type Damage = {
     diceCount: number;
     diceValue: number;
     fixedValue: number | null;
     diceString: string;
 }
 
-type Modifier = ScoreBonusModifier | ProficiencyModifier;
+export type Modifier = ScoreBonusModifier | ProficiencyModifier;
+export type ModifierType = Modifier["type"];
+export type ModifierSubType<T extends ModifierType> = T extends "bonus" ? ScoreBonusSubType : ProficiencySubType;
 
-type ScoreBonusModifier = {
+export type ScoreBonusModifier = {
     type: "bonus";
-    subType: "intelligence-score";
+    subType: ScoreBonusSubType;
     value: number;
 }
 
-type ProficiencyModifier = {
+export type ScoreBonusSubType = "strength-score" | "dexterity-score" | "constitution-score" | "intelligence-score" | "wisdom-score" | "charisma-score";
+
+export type ProficiencyModifier = {
     type: "proficiency";
     subType: ProficiencySubType;
 }
 
-type ProficiencySubType = SkillProficiencySubType | SavingThrowProficiencySubType;
-type SkillProficiencySubType = "arcana" | "history" | "nature" | "religion" | "investigation";
-type SavingThrowProficiencySubType = "intelligence-saving-throws" | "wisdom-saving-throws";
+export type ProficiencySubType = SkillProficiencySubType | SavingThrowProficiencySubType;
+export type SkillProficiencySubType = "arcana" | "history" | "nature" | "religion" | "investigation";
+export type SavingThrowProficiencySubType = "strength-saving-throws" | "dexterity-saving-throws" | "constitution-saving-throws" | "intelligence-saving-throws" | "wisdom-saving-throws" | "charisma-saving-throws";

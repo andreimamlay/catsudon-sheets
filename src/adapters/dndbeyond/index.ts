@@ -1,5 +1,6 @@
 import axios from "axios";
-import { Adapter, CanConvert, Character, ChatPalette, Convert } from "../types";
+import { Adapter, CanConvert, CCFoliaCharacter, ChatPalette, Convert } from "../types";
+import { DndBeyondApiResponse, DndBeyondCharacterData, Modifier, ModifierSubType, ModifierType } from "./types";
 
 const characterSheetRegex = /^https\:\/\/www\.dndbeyond\.com\/characters\/(\d+)$/;
 
@@ -9,13 +10,17 @@ const canConvert: CanConvert = (characterSheetUrl: string) => {
 
 export const convert: Convert = async (characterSheetUrl: string) => {
     const characterSheetData = await download(characterSheetUrl);
-    const characterSheetResponse = JSON.parse(characterSheetData) as ApiResponse;
-    const characterSheet = characterSheetResponse.data;
+    const characterSheetResponse = JSON.parse(characterSheetData) as DndBeyondApiResponse;
+    if (!characterSheetResponse.data) {
+        throw new Error("Could not read character sheet data");
+    }
 
-    const character: Character = {
+    const dndBeyondCharacterData = characterSheetResponse.data;
+
+    const character: CCFoliaCharacter = {
         kind: "character",
         data: {
-            name: characterSheet.name,
+            name: dndBeyondCharacterData.name,
             initiative: 0,
             externalUrl: "",
             iconUrl: "",
@@ -32,7 +37,7 @@ export const convert: Convert = async (characterSheetUrl: string) => {
         skills: []
     };
 
-    readStatus(characterSheet, character, chatPalette);
+    readStatus(dndBeyondCharacterData, character, chatPalette);
     
     return character;
 }
@@ -57,26 +62,70 @@ async function download(characterSheetUrl: string) {
     return response.data;
 }
 
-function readStatus(characterSheet: Data, character: Character, chatPalette: ChatPalette) {
-    // maxhp = base + (total level) * con modifier
-    
-    character.data.status.push({
-        label: "HP",
-        value: isNaN(currentHp) ? maxHp : currentHp,
-        max: maxHp
-    });
+function readStatus(dndCharacter: DndBeyondCharacterData, character: CCFoliaCharacter, chatPalette: ChatPalette) {
+    const abilityScores = {
+        strength: dndCharacter.stats[0].value,
+        dexterity: dndCharacter.stats[1].value,
+        constitution: dndCharacter.stats[2].value,
+        intelligence: dndCharacter.stats[3].value,
+        wisdom: dndCharacter.stats[4].value,
+        charisma: dndCharacter.stats[5].value,
+    };
 
-    character.data.status.push({
-        label: "ー時HP",
-        value: isNaN(tempHp) ? 0 : tempHp,
-        max: 0
-    });
-    
-    for (const stat of characterSheet.stats) {
-        switch (stat.id) {
-            case 1:
+    const modifiers = [
+        ...dndCharacter.modifiers.race, 
+        ...dndCharacter.modifiers.class,
+        ...dndCharacter.modifiers.background,
+        ...dndCharacter.modifiers.item,
+        ...dndCharacter.modifiers.feat
+    ];
+
+    abilityScores.strength += readModifiers(modifiers, "bonus", "strength-score");
+    abilityScores.dexterity += readModifiers(modifiers, "bonus", "dexterity-score");
+    abilityScores.constitution += readModifiers(modifiers, "bonus", "constitution-score");
+    abilityScores.intelligence += readModifiers(modifiers, "bonus", "intelligence-score");
+    abilityScores.wisdom += readModifiers(modifiers, "bonus", "wisdom-score");
+    abilityScores.charisma += readModifiers(modifiers, "bonus", "charisma-score");
+
+    const abilityModifiers = {
+        strength: abilityScoreToModifier(abilityScores.strength),
+        dexterity: abilityScoreToModifier(abilityScores.dexterity),
+        constitution: abilityScoreToModifier(abilityScores.constitution),
+        intelligence: abilityScoreToModifier(abilityScores.intelligence),
+        wisdom: abilityScoreToModifier(abilityScores.wisdom),
+        charisma: abilityScoreToModifier(abilityScores.charisma)
+    };
+
+    const savingThrows = { ...abilityModifiers };
+    savingThrows.strength += readModifiers(modifiers, "proficiency", "strength-saving-throws");
+    savingThrows.dexterity += readModifiers(modifiers, "proficiency", "dexterity-saving-throws");
+    savingThrows.constitution += readModifiers(modifiers, "proficiency", "constitution-saving-throws");
+    savingThrows.intelligence += readModifiers(modifiers, "proficiency", "intelligence-saving-throws");
+    savingThrows.wisdom += readModifiers(modifiers, "proficiency", "wisdom-saving-throws");
+    savingThrows.charisma += readModifiers(modifiers, "proficiency", "charisma-saving-throws");
+
+    console.log(abilityModifiers, savingThrows);
+}
+
+function readModifiers<T extends ModifierType>(modifiers: Modifier[], type: T, subType: ModifierSubType<T>) {
+    let value = 0;
+    for (const modifier of modifiers) {
+        if (modifier.type === type && modifier.subType === subType) {
+            if (modifier.type === "proficiency") {
+                console.log("asd", modifier);
+                return 2;
+            }
+            
+            value += modifier.value;
         }
     }
+
+    return value;
+}
+
+
+function abilityScoreToModifier(score: number) {
+    return Math.floor((score - 10) / 2);
 }
 
 export default {
