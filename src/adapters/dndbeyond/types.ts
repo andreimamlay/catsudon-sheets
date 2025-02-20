@@ -12,7 +12,16 @@ type Data = {
     baseHitPoints: number;
     temporaryHitPoints: number;
     stats: Stat[];
-    race: Race;
+    inventory: Equipment[];
+    classes: Class[];
+    modifiers: {
+        race: Modifier[];
+        class: Modifier[];
+        background: Modifier[];
+        item: Modifier[];
+        feat: Modifier[];
+        condition: Modifier[];
+    }
 }
 
 type Stat = {
@@ -20,6 +29,49 @@ type Stat = {
     value: number;
 }
 
-type Race = {
-    baseRaceName: string;
+type Equipment = {
+    definition: EquipmentDefinition;
+}   
+
+type EquipmentDefinition = {
+    name: string;
+    damage: Damage | null;
 }
+
+type Class = {
+    level: number;
+    definition: ClassDefinition;
+}
+
+type ClassDefinition = {
+    hitDice: number;
+    spellRules: SpellRules | null;
+}
+
+type SpellRules = {
+    levelSpellSlots: number[][]; // classLevel[slotLevel], level = index
+}
+
+type Damage = {
+    diceCount: number;
+    diceValue: number;
+    fixedValue: number | null;
+    diceString: string;
+}
+
+type Modifier = ScoreBonusModifier | ProficiencyModifier;
+
+type ScoreBonusModifier = {
+    type: "bonus";
+    subType: "intelligence-score";
+    value: number;
+}
+
+type ProficiencyModifier = {
+    type: "proficiency";
+    subType: ProficiencySubType;
+}
+
+type ProficiencySubType = SkillProficiencySubType | SavingThrowProficiencySubType;
+type SkillProficiencySubType = "arcana" | "history" | "nature" | "religion" | "investigation";
+type SavingThrowProficiencySubType = "intelligence-saving-throws" | "wisdom-saving-throws";

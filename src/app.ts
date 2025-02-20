@@ -1,7 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import morgan from "morgan";
-import * as sakura from "./adapters/sakura"
+import sakura from "./adapters/sakura"
+import dndbeyond from "./adapters/dndbeyond"
 
 dotenv.config();
 
@@ -16,8 +17,14 @@ app.get("/", (_, res) => {
 
 app.get("/convert/sakura/:id", async (req, res) => {
     const characterSheetUrl = `https://dndjp.sakura.ne.jp/OUTPUT.php?ID=${req.params.id}`;
-    const characterSheet = await sakura.downloader(characterSheetUrl);
-    const character = sakura.adapter(characterSheet);
+    const character = await sakura.convert(characterSheetUrl);
+    res.contentType("application/json");
+    res.send(character);
+});
+
+app.get("/convert/dndbeyond/:id", async (req, res) => {
+    const characterSheetUrl = `https://www.dndbeyond.com/characters/${req.params.id}`;
+    const character = await dndbeyond.convert(characterSheetUrl);
     res.contentType("application/json");
     res.send(character);
 });

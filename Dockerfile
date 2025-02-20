@@ -5,8 +5,7 @@ COPY package.json ./
 COPY yarn.lock ./
 COPY tsconfig.json ./
 COPY src ./src
-RUN yarn install 
-RUN yarn run build
+RUN yarn install && yarn run build
 
 FROM node:latest AS runtime
 WORKDIR /app

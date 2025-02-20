@@ -1,5 +1,10 @@
-export type CharacterSheetAdapter = (characterSheetData: string) => Character;
-export type CharacterSheetDownloader = (characterSheetUrl: string) => Promise<string>;
+export type Adapter = {
+    canConvert: CanConvert;
+    convert: Convert;
+}
+
+export type CanConvert = (characterSheetUrl: string) => boolean;
+export type Convert = (characterSheetUrl: string) => Promise<Character>;
 
 export type Character = {
     kind: "character";

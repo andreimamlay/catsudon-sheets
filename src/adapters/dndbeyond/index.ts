@@ -1,27 +1,14 @@
 import axios from "axios";
-import { Character, CharacterSheetAdapter, CharacterSheetDownloader, ChatPalette } from "../types";
+import { Adapter, CanConvert, Character, ChatPalette, Convert } from "../types";
 
-export const downloader: CharacterSheetDownloader = async (characterSheetUrl: string) => {
-    const urlMatch = characterSheetUrl.match(/^https\:\/\/www\.dndbeyond\.com\/characters\/(\d+)$/);
-    if (!urlMatch) {
-        throw new Error("Invalid character sheet URL");
-    }
-    
-    const characterSheetJsonUrl = `https://character-service.dndbeyond.com/character/v5/character/${urlMatch[1]}`;
-    const response = await axios.request({
-        method: "GET",
-        url: characterSheetJsonUrl,
-        responseType: "text"
-    });
+const characterSheetRegex = /^https\:\/\/www\.dndbeyond\.com\/characters\/(\d+)$/;
 
-    if (response.status !== 200) {
-        throw new Error("Failed to load character sheet");
-    }
-    
-    return response.data;
+const canConvert: CanConvert = (characterSheetUrl: string) => {
+    return characterSheetRegex.test(characterSheetUrl);
 }
 
-export const adapter: CharacterSheetAdapter = (characterSheetData: string) => {
+export const convert: Convert = async (characterSheetUrl: string) => {
+    const characterSheetData = await download(characterSheetUrl);
     const characterSheetResponse = JSON.parse(characterSheetData) as ApiResponse;
     const characterSheet = characterSheetResponse.data;
 
@@ -50,7 +37,29 @@ export const adapter: CharacterSheetAdapter = (characterSheetData: string) => {
     return character;
 }
 
+async function download(characterSheetUrl: string) {
+    const urlMatch = characterSheetUrl.match(characterSheetRegex);
+    if (!urlMatch) {
+        throw new Error("Invalid character sheet URL");
+    }
+    
+    const characterSheetJsonUrl = `https://character-service.dndbeyond.com/character/v5/character/${urlMatch[1]}`;
+    const response = await axios.request({
+        method: "GET",
+        url: characterSheetJsonUrl,
+        responseType: "text"
+    });
+
+    if (response.status !== 200) {
+        throw new Error("Failed to load character sheet");
+    }
+    
+    return response.data;
+}
+
 function readStatus(characterSheet: Data, character: Character, chatPalette: ChatPalette) {
+    // maxhp = base + (total level) * con modifier
+    
     character.data.status.push({
         label: "HP",
         value: isNaN(currentHp) ? maxHp : currentHp,
@@ -70,4 +79,7 @@ function readStatus(characterSheet: Data, character: Character, chatPalette: Cha
     }
 }
 
-
+export default {
+    canConvert,
+    convert
+} satisfies Adapter;

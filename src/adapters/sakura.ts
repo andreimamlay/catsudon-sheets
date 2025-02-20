@@ -1,12 +1,51 @@
 import axios from "axios";
 import Encoding from "encoding-japanese";
-import { Character, CharacterSheetAdapter, CharacterSheetDownloader, ChatPalette } from "./types";
+import { Adapter, CanConvert, Character, ChatPalette, Convert } from "./types";
 import * as cheerio from "cheerio"
 
 const decoder = new TextDecoder();
 
-export const downloader: CharacterSheetDownloader = async (characterSheetUrl: string) => {
-    if (!isCharacterSheetUrlValid(characterSheetUrl)) {
+const canConvert: CanConvert = (url: string): boolean => {
+    return /^https\:\/\/dndjp.sakura.ne.jp\/OUTPUT.php\?ID=(\d+)$/.test(url);
+}
+
+const convert: Convert = async (characterSheetUrl: string) => {
+    const characterSheetData = await download(characterSheetUrl);
+    const character: Character = {
+        kind: "character",
+        data: {
+            name: "",
+            initiative: 0,
+            externalUrl: "",
+            iconUrl: "",
+            commands: "",
+            status: [],
+            params: []
+        }
+    };
+
+    const chatPalette: ChatPalette = {
+        attacks: [],
+        abilityScores: [],
+        savingThrows: [],
+        skills: []
+    };
+
+    const $ = cheerio.load(characterSheetData);
+
+    readStatus($, character, chatPalette);
+    readParameters($, character, chatPalette);
+    readAttacks($, character, chatPalette);
+    readSkills($, character, chatPalette);
+    readSpellSlots($, character, chatPalette);
+
+    character.data.commands = toCommands(chatPalette);
+    
+    return character;
+};
+
+async function download(characterSheetUrl: string) {
+    if (!canConvert(characterSheetUrl)) {
         throw new Error("Invalid character sheet URL");
     }
 
@@ -123,43 +162,6 @@ const CssSelectors = {
     ]
 }
 
-export const adapter: CharacterSheetAdapter = (characterSheetData: string) => {
-    const character: Character = {
-        kind: "character",
-        data: {
-            name: "",
-            initiative: 0,
-            externalUrl: "",
-            iconUrl: "",
-            commands: "",
-            status: [],
-            params: []
-        }
-    };
-
-    const chatPalette: ChatPalette = {
-        attacks: [],
-        abilityScores: [],
-        savingThrows: [],
-        skills: []
-    };
-
-    const $ = cheerio.load(characterSheetData);
-
-    readStatus($, character, chatPalette);
-    readParameters($, character, chatPalette);
-    readAttacks($, character, chatPalette);
-    readSkills($, character, chatPalette);
-    readSpellSlots($, character, chatPalette);
-
-    character.data.commands = toCommands(chatPalette);
-    
-    return character;
-};
-
-function isCharacterSheetUrlValid(url: string): boolean {
-    return /^https\:\/\/dndjp.sakura.ne.jp\/OUTPUT.php\?ID=(\d+)$/.test(url);
-}
 
 function readStatus($: cheerio.CheerioAPI, character: Character, chatPalette: ChatPalette) {
     character.data.name = $(CssSelectors.characterName).text();
@@ -347,3 +349,7 @@ function readSkills($: cheerio.CheerioAPI, character: Character, chatPalette: Ch
     }
 }
 
+export default {
+    canConvert,
+    convert
+} satisfies Adapter
