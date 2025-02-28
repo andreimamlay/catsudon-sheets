@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Adapter, CanConvert, CCFoliaCharacter, ChatPalette, Convert } from "../types";
-import { DndBeyondApiResponse, DndBeyondCharacterData, Modifier, ModifierSubType, ModifierType } from "./types";
+import { DndBeyondApiResponse, DndBeyondCharacterData, FeatureDefinition, Modifier, ModifierSubType, ModifierType } from "./types";
 
 const characterSheetRegex = /^https\:\/\/www\.dndbeyond\.com\/characters\/(\d+)$/;
 
@@ -37,7 +37,25 @@ export const convert: Convert = async (characterSheetUrl: string) => {
         skills: []
     };
 
-    readStatus(dndBeyondCharacterData, character, chatPalette);
+    const features: [number, string, number][] = []
+    for (const trait of dndBeyondCharacterData.race.racialTraits) {
+        features.push([trait.definition.id, trait.definition.name, 1]);
+    }
+
+    const characterLevel = dndBeyondCharacterData.classes.reduce((acc, characterClass) => acc + characterClass.level, 0);
+
+    for (const characterClass of dndBeyondCharacterData.classes) {
+        if (!characterClass.isStartingClass) continue;
+
+        for (const feature of characterClass.classFeatures) {
+            if (feature.definition.requiredLevel > characterClass.level) continue;
+            features.push([feature.definition.id, feature.definition.name, feature.definition.requiredLevel]);
+        }
+    }
+
+    console.log(features);
+
+    // readStatus(dndBeyondCharacterData, character, chatPalette);
     
     return character;
 }
@@ -103,8 +121,6 @@ function readStatus(dndCharacter: DndBeyondCharacterData, character: CCFoliaChar
     savingThrows.intelligence += readModifiers(modifiers, "proficiency", "intelligence-saving-throws");
     savingThrows.wisdom += readModifiers(modifiers, "proficiency", "wisdom-saving-throws");
     savingThrows.charisma += readModifiers(modifiers, "proficiency", "charisma-saving-throws");
-
-    console.log(abilityModifiers, savingThrows);
 }
 
 function readModifiers<T extends ModifierType>(modifiers: Modifier[], type: T, subType: ModifierSubType<T>) {
@@ -112,7 +128,6 @@ function readModifiers<T extends ModifierType>(modifiers: Modifier[], type: T, s
     for (const modifier of modifiers) {
         if (modifier.type === type && modifier.subType === subType) {
             if (modifier.type === "proficiency") {
-                console.log("asd", modifier);
                 return 2;
             }
             

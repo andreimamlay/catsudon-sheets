@@ -12,6 +12,7 @@ export type DndBeyondCharacterData = {
     baseHitPoints: number;
     temporaryHitPoints: number;
     stats: [Stat<1>, Stat<2>, Stat<3>, Stat<4>, Stat<5>, Stat<6>];
+    race: Race;
     inventory: Equipment[];
     classes: Class[];
     modifiers: {
@@ -29,6 +30,19 @@ export type Stat<id> = {
     value: number;
 }
 
+export type Race = {
+    racialTraits: RacialTrait[];
+}
+
+export type RacialTrait = {
+    definition: TraitDefinition;
+}
+
+export type TraitDefinition = {
+    id: number;
+    name: string;
+}
+
 export type Equipment = {
     definition: EquipmentDefinition;
 }   
@@ -42,6 +56,7 @@ export type Class = {
     level: number;
     isStartingClass: boolean;
     definition: ClassDefinition;
+    classFeatures: ClassFeature[];
 }
 
 export type ClassDefinition = {
@@ -51,6 +66,16 @@ export type ClassDefinition = {
 
 export type SpellRules = {
     levelSpellSlots: number[][]; // classLevel[slotLevel], level = index
+}
+
+export type ClassFeature = {
+    definition: FeatureDefinition;
+}
+
+export type FeatureDefinition = {
+    id: number;
+    name: string;
+    requiredLevel: number;
 }
 
 export type Damage = {
