@@ -1,14 +1,13 @@
-FROM node:latest AS build
+FROM node:current-alpine AS build
 WORKDIR /app
 
 COPY package.json ./
 COPY yarn.lock ./
 COPY tsconfig.json ./
 COPY src ./src
-RUN yarn install 
-RUN yarn run build
+RUN yarn install && yarn run build
 
-FROM node:latest AS runtime
+FROM node:current-alpine AS runtime
 WORKDIR /app
 COPY --from=build /app/dist .
 COPY --from=build /app/package*.json .

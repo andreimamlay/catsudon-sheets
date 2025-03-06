@@ -37,6 +37,7 @@ const CssSelectors = {
     hitDice: "table.DD5ePage:nth-child(7) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(3) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(7) > td:nth-child(2)",
     ac: "table.DD5ePage:nth-child(6) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1)",
     inspiration: "table.DD5ePage:nth-child(7) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2)",
+    proficiencyBonus: "table.DD5ePage:nth-child(7) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(4)",
     abilityScores: [
         { label: "筋力", selector: ".MBC > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(3)"},
         { label: "敏捷力", selector: ".MBC > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(3)"},
@@ -199,7 +200,7 @@ function readStatus($: cheerio.CheerioAPI, character: Character, chatPalette: Ch
     character.data.status.push({
         label: "インスピ",
         value: isNaN(inspiration) ? 0 : inspiration,
-        max: 2
+        max: 0
     });
 }
 function readSpellSlots($: cheerio.CheerioAPI, character: Character, chatPalette: ChatPalette) {
@@ -234,7 +235,7 @@ function readParameters($: cheerio.CheerioAPI, character: Character, chatPalette
 
     const passivePerception = $(CssSelectors.passivePerception).text().trim();
     character.data.params.push({
-        label: "自動知覚",
+        label: "受動知覚",
         value: passivePerception || "0",
     });
 
