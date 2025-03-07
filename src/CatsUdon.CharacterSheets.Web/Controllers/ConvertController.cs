@@ -20,4 +20,21 @@ public class ConvertController(IEnumerable<ICharacterSheetAdapter> adapters) : C
 
         return Ok(":(");
     }
+
+    [HttpGet("/api/convert/sakura/{id}")]
+    public async Task<IActionResult> Convert(int id)
+    {
+        var url = $"https://dndjp.sakura.ne.jp/OUTPUT.php?ID={id}";
+
+        foreach (var adapter in adapters)
+        {
+            if (adapter.CanConvert(url))
+            {
+                var characterSheet = await adapter.Convert(url);
+                return Ok(characterSheet.CCFoliaCharacter);
+            }
+        }
+
+        return Ok(":(");
+    }
 }

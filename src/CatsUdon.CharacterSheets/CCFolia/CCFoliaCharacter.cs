@@ -1,7 +1,7 @@
 ﻿namespace CatsUdon.CharacterSheets.CCFolia;
 
-public class Character
+public class CCFoliaCharacter
 {
     public string Kind => "character";
-    public CharacterData Data { get; set; } = new();
+    public CCFoliaCharacterData Data { get; set; } = new();
 }
