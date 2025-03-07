@@ -1,0 +1,6 @@
+@CatsUdon.CharacterSheets.Web_HostAddress = https://localhost:44377
+
+GET {{CatsUdon.CharacterSheets.Web_HostAddress}}/api/convert/?url=https://dndjp.sakura.ne.jp/OUTPUT.php?ID=46016
+Accept: application/json
+
+###
