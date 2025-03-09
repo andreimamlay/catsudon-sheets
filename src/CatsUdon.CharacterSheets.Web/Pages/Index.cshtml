@@ -1,0 +1,57 @@
+﻿@page
+@model CatsUdon.CharacterSheets.Web.Pages.IndexModel
+@{
+}
+
+<div class="flex flex-col gap-4 mt-4 w-full xl:w-6xl ">
+    <div class="p-4 bg-stone-50 flex flex-col gap-4">
+        <h3>キャラシートURL</h3>
+        <form method="get" class="contents">
+            <input autocomplete="off" class="rounded-xl bg-white p-4" type="text" asp-for="CharacterSheetUrl" name="url" placeholder="キャラシートのURLを入力してください" />
+            <div>
+                <button class="rounded-md bg-blue-400 text-white w-auto pl-5 pr-5 pt-2 pb-2" type="submit">変換</button>
+            </div>
+        </form>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Model.CharacterSheetJson)) 
+    {
+        <div class="p-4 bg-stone-50 flex flex-col gap-4">
+            <h3>キャラシート変換結果</h3>
+            <textarea readonly data-area-id="character-sheet" class="rounded-xl bg-white p-4 h-48 text-sm font-mono">@Model.CharacterSheetJson</textarea>
+            <div class="flex gap-4 ">
+                <button data-action="copy" data-copy-source="character-sheet" class="rounded-md bg-blue-400 text-white w-auto pl-5 pr-5 pt-2 pb-2" type="button">コピー</button>
+                <span class="pt-2 pb-2" data-copy-result="character-sheet"></span>
+            </div>
+        </div>
+    }
+</div>
+
+@section scripts {
+    <script>
+        for (const textarea of document.querySelectorAll("textarea")) {
+            textarea.addEventListener("focus", function() {
+                this.select();
+            });
+        }
+
+        for (const button of document.querySelectorAll("button[data-action='copy']")) {
+            button.addEventListener("click", function() {
+                const copySource = this.dataset["copySource"];
+                if (!copySource) return;
+
+                const copySourceTextArea = document.querySelector(`textarea[data-area-id='${copySource}']`);
+                if (!copySourceTextArea) return;
+
+                navigator.clipboard.writeText(copySourceTextArea.value).then(() => {
+                    const copyResult = document.querySelector(`span[data-copy-result='${copySource}']`);
+                    if (!copyResult) return;
+
+                    copyResult.textContent = "コピーしました";
+
+                }).catch(error => {
+                    copyResult.textContent = `コピーできませんでした。${error}`;
+                });
+            });
+        }
+    </script>
+}
