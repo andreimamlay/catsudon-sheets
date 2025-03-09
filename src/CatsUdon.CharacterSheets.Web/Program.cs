@@ -20,7 +20,6 @@ builder.Services.AddSingleton(new JsonSerializerOptions(JsonSerializerDefaults.W
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
 app.MapStaticAssets();
 app.UseAuthorization();
 app.MapControllers();

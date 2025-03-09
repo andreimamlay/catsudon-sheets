@@ -2,6 +2,7 @@
   "name": "catsudon-sheets",
   "version": "1.0.0",
   "scripts": {
+    "build": "npx @tailwindcss/cli -i ./tailwind.css -o ./wwwroot/css/site.css",
     "watch": "npx @tailwindcss/cli -i ./tailwind.css -o ./wwwroot/css/site.css --watch"
   },
   "author": "",

@@ -7,6 +7,8 @@ namespace CatsUdon.CharacterSheets.Web.Pages;
 
 public class IndexModel(IEnumerable<ICharacterSheetAdapter> adapters, JsonSerializerOptions jsonSerializerOptions) : PageModel
 {
+    private static readonly Lazy<string> CommitHashProvider = new(ReadCommitHash);
+
     [BindProperty(Name = "url", SupportsGet = true)]
     public string? CharacterSheetUrl { get; set; }
 
@@ -16,6 +18,8 @@ public class IndexModel(IEnumerable<ICharacterSheetAdapter> adapters, JsonSerial
 
     public async Task OnGet()
     {
+        ViewData["CommitHash"] = CommitHashProvider.Value;
+
         if (!String.IsNullOrWhiteSpace(CharacterSheetUrl))
         {
             foreach (var adapter in adapters)
@@ -30,5 +34,13 @@ public class IndexModel(IEnumerable<ICharacterSheetAdapter> adapters, JsonSerial
                 }
             }
         }
+    }
+
+    private static string ReadCommitHash()
+    {
+        if (!System.IO.File.Exists("commit_hash"))
+            return "No Info";
+
+        return System.IO.File.ReadAllText("commit_hash");
     }
 }

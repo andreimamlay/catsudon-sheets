@@ -133,7 +133,7 @@ public partial class DndJpAdapter(HttpClient httpClient) : ICharacterSheetAdapte
             }
         }
 
-        ccfoliaCharacter.Data.Commands = commands.Replace("\r\n", "\n").ToString();
+        ccfoliaCharacter.Data.Commands = commands.Replace("\r\n", "\n").ToString().Trim();
 
         return ccfoliaCharacter;
     }
