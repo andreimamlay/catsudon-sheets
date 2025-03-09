@@ -42,13 +42,13 @@ public partial class DndJpAdapter(HttpClient httpClient) : ICharacterSheetAdapte
 
         return new CharacterSheet()
         {
-            CCFoliaCharacter = ConvertToCCFoliaCharacter(character)
+            Character = ConvertToCCFoliaCharacter(character)
         };
     }
 
-    private static CCFoliaCharacter ConvertToCCFoliaCharacter(Character character)
+    private static CCFoliaCharacterClipboardData ConvertToCCFoliaCharacter(Character character)
     {
-        var ccfoliaCharacter = new CCFoliaCharacter();
+        var ccfoliaCharacter = new CCFoliaCharacterClipboardData();
         var data = ccfoliaCharacter.Data;
         data.Name = character.Name;
         data.Initiative = 0;
@@ -79,7 +79,7 @@ public partial class DndJpAdapter(HttpClient httpClient) : ICharacterSheetAdapte
         commands.AppendLine($"1d20{character.Initiative} イニシアチブ");
         if (character.HitDice.HasValue)
         {
-            commands.AppendLine($"1d{character.HitDice.Value.Sides} ヒットダイスでHP回復");
+            commands.AppendLine($"1d{character.HitDice.Value.Sides} ヒットダイスでHP回復（{character.HitDice.Value.Count}回まで）");
         }
 
         if (character.Attacks.Count > 0) 
@@ -89,7 +89,7 @@ public partial class DndJpAdapter(HttpClient httpClient) : ICharacterSheetAdapte
             {
                 if (attack.AttackBonus.HasValue)
                 {
-                    commands.AppendLine($"1d20{attack.AttackBonus} 【{attack.Name}】 攻撃ロール");
+                    commands.AppendLine($"1d20{attack.AttackBonus} 【{attack.Name}】 攻撃ロール・命中ロール");
                 }
 
                 commands.AppendLine($"{attack.Damage} 【{attack.Name}】 ダメージ");

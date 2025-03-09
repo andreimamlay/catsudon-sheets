@@ -1,15 +1,15 @@
-@CatsUdon.CharacterSheets.Web_HostAddress = https://localhost:44377
+@Host = https://localhost:44377
 
-GET {{CatsUdon.CharacterSheets.Web_HostAddress}}/api/convert/?url=https://dndjp.sakura.ne.jp/OUTPUT.php?ID=46016
+GET {{Host}}/api/convert/?url=https://dndjp.sakura.ne.jp/OUTPUT.php?ID=46016
 Accept: application/json
 
 ###
 
-GET {{CatsUdon.CharacterSheets.Web_HostAddress}}/api/convert/sakura/46016
+GET {{Host}}/api/convert/?url=https://dndjp.sakura.ne.jp/OUTPUT_BROKEN.php?ID=46016
 Accept: application/json
 
 ###
 
-GET {{CatsUdon.CharacterSheets.Web_HostAddress}}/api/convert/?url=https://dndjp.sakura.ne.jp/OUTPUT.php?ID=45939
+GET {{Host}}/api/convert/?url=https://dndjp.sakura.ne.jp/OUTPUT.php?ID=45939
 Accept: application/json
 

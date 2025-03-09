@@ -3,13 +3,21 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewBag.Title</title>
+    <link rel="icon" type="image/png" href="~/favicon.png" />
+    @if (string.IsNullOrWhiteSpace(ViewBag.Title)) 
+    {
+        <title>CatsUdonキャラシート</title>
+    } 
+    else
+    {
+        <title>@ViewBag.Title - CatsUdonキャラシート</title>
+    }
     <link href="~/css/site.css" rel="stylesheet" />
 </head>
 <body>
     <div class="bg-white">
         <div class="flex justify-between content-center bg-stone-100 h-12 px-4">
-            <div class="self-center">CatsUdon - キャラシート</div>
+            <div class="self-center">CatsUdon キャラシート</div>
             <div class="self-center">version: @ViewBag.CommitHash</div>
         </div>
         <div class="flex justify-center h-full">

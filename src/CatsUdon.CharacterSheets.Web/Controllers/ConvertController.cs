@@ -1,4 +1,5 @@
 ﻿using CatsUdon.CharacterSheets.Adapters.Abstractions;
+using CatsUdon.CharacterSheets.CCFolia;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatsUdon.CharacterSheets.Web.Controllers;
@@ -7,34 +8,62 @@ namespace CatsUdon.CharacterSheets.Web.Controllers;
 public class ConvertController(IEnumerable<ICharacterSheetAdapter> adapters) : ControllerBase
 {
     [HttpGet("/api/convert/")]
-    public async Task<IActionResult> Convert([FromQuery] string url)
+    public async Task<ConvertCharacterSheetResponse> Convert([FromQuery] string url)
     {
-        foreach (var adapter in adapters)
+        try
         {
-            if (adapter.CanConvert(url))
+            foreach (var adapter in adapters)
             {
-                var characterSheet = await adapter.Convert(url);
-                return Ok(characterSheet);
+                if (adapter.CanConvert(url))
+                {
+                    var characterSheet = await adapter.Convert(url);
+                    return new ConvertCharacterSheetResponse()
+                    {
+                        Success = true,
+                        Data = new CharacterSheetData()
+                        {
+                            CharacterSheet = characterSheet.Character,
+                            AdditionalTextSheets = [.. characterSheet.AdditionalTextSheets]
+                        }
+                    };
+                }
             }
+
+            return new ConvertCharacterSheetResponse()
+            {
+                Success = false,
+                ErrorCode = ErrorCodes.NotSupported,
+                Error = "No converter found for the given URL."
+            };
         }
-
-        return Ok(":(");
-    }
-
-    [HttpGet("/api/convert/sakura/{id}")]
-    public async Task<IActionResult> Convert(int id)
-    {
-        var url = $"https://dndjp.sakura.ne.jp/OUTPUT.php?ID={id}";
-
-        foreach (var adapter in adapters)
+        catch (Exception ex)
         {
-            if (adapter.CanConvert(url))
+            return new ConvertCharacterSheetResponse()
             {
-                var characterSheet = await adapter.Convert(url);
-                return Ok(characterSheet.CCFoliaCharacter);
-            }
+                Success = false,
+                ErrorCode = ErrorCodes.InternalError,
+                Error = ex.Message
+            };
         }
-
-        return Ok(":(");
     }
+}
+
+public class ConvertCharacterSheetResponse
+{
+    public bool Success { get; set; }
+    public ErrorCodes? ErrorCode { get; set; }
+    public string? Error { get; set; }
+    public CharacterSheetData? Data { get; set; }
+}
+
+public class CharacterSheetData
+{
+    public required CCFoliaCharacterClipboardData CharacterSheet { get; set; }
+    public string[] AdditionalTextSheets { get; set; } = [];
+}
+
+public enum ErrorCodes
+{
+    InternalError = 1,
+    NotSupported = 2
 }

@@ -1,4 +1,4 @@
-using CatsUdon.CharacterSheets.Adapters.Abstractions;
+﻿using CatsUdon.CharacterSheets.Adapters.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Text.Json;
@@ -12,6 +12,10 @@ public class IndexModel(IEnumerable<ICharacterSheetAdapter> adapters, JsonSerial
     [BindProperty(Name = "url", SupportsGet = true)]
     public string? CharacterSheetUrl { get; set; }
 
+
+    public string? ErrorMessage { get; set; }
+
+    public string? CharacterName { get; set; }
     public string? CharacterSheetJson { get; set; }
     public List<string>? AdditionalTextSheets { get; set; }
 
@@ -22,16 +26,34 @@ public class IndexModel(IEnumerable<ICharacterSheetAdapter> adapters, JsonSerial
 
         if (!String.IsNullOrWhiteSpace(CharacterSheetUrl))
         {
-            foreach (var adapter in adapters)
+            try
             {
-                if (adapter.CanConvert(CharacterSheetUrl))
+                var converted = false;
+                foreach (var adapter in adapters)
                 {
-                    var character = await adapter.Convert(CharacterSheetUrl);
-                    CharacterSheetJson = JsonSerializer.Serialize(character.CCFoliaCharacter, jsonSerializerOptions);
-                    AdditionalTextSheets = character.AdditionalTextSheets;
-                    
-                    break;
+                    if (adapter.CanConvert(CharacterSheetUrl))
+                    {
+                        var character = await adapter.Convert(CharacterSheetUrl);
+
+                        CharacterName = character.Character.Data.Name;
+                        ViewData["Title"] = CharacterName;
+
+                        CharacterSheetJson = JsonSerializer.Serialize(character.Character, jsonSerializerOptions);
+                        AdditionalTextSheets = character.AdditionalTextSheets;
+                        converted = true;
+
+                        break;
+                    }
                 }
+
+                if (!converted)
+                {
+                    ErrorMessage = "URLをサポートしていません。";
+                }
+            }
+            catch (Exception)
+            {
+                ErrorMessage = "例外発生しました。";
             }
         }
     }
@@ -41,6 +63,11 @@ public class IndexModel(IEnumerable<ICharacterSheetAdapter> adapters, JsonSerial
         if (!System.IO.File.Exists("commit_hash"))
             return "No Info";
 
-        return System.IO.File.ReadAllText("commit_hash");
+        var hash = System.IO.File.ReadAllText("commit_hash");
+        return hash switch
+        {
+            { Length: > 8 } => hash[0..8],
+            _ => hash
+        };
     }
 }

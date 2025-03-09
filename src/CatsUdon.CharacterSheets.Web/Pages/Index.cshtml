@@ -5,19 +5,23 @@
 
 <div class="flex flex-col gap-4 mt-4 w-full xl:w-6xl ">
     <div class="p-4 bg-stone-50 flex flex-col gap-4">
-        <h3>キャラシートURL</h3>
+        <h2>キャラシートURL</h2>
         <form method="get" class="contents">
-            <input autocomplete="off" class="rounded-xl bg-white p-4" type="text" asp-for="CharacterSheetUrl" name="url" placeholder="キャラシートのURLを入力してください" />
-            <div>
+            <input autocomplete="off" class="rounded-xl bg-white p-4 border border-stone-200" type="text" asp-for="CharacterSheetUrl" name="url" placeholder="キャラシートのURLを入力してください" />
+            <div class="flex gap-4">
                 <button class="rounded-md bg-blue-400 text-white w-auto pl-5 pr-5 pt-2 pb-2" type="submit">変換</button>
+                @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage)) {
+                <span class="pt-2 pb-2 text-red-500">キャラシートを変換できませんでした： @Model.ErrorMessage</span>
+                }
             </div>
         </form>
     </div>
     @if (!string.IsNullOrWhiteSpace(Model.CharacterSheetJson)) 
     {
+        <h2 class="ml-4 text-2xl">@Model.CharacterName</h2>
         <div class="p-4 bg-stone-50 flex flex-col gap-4">
-            <h3>キャラシート変換結果</h3>
-            <textarea readonly data-area-id="character-sheet" class="rounded-xl bg-white p-4 h-48 text-sm font-mono">@Model.CharacterSheetJson</textarea>
+            <h2>キャラシート</h2>
+            <textarea readonly data-area-id="character-sheet" class="rounded-xl bg-white p-4 h-48 text-sm font-mono border border-stone-200">@Model.CharacterSheetJson</textarea>
             <div class="flex gap-4 ">
                 <button data-action="copy" data-copy-source="character-sheet" class="rounded-md bg-blue-400 text-white w-auto pl-5 pr-5 pt-2 pb-2" type="button">コピー</button>
                 <span class="pt-2 pb-2" data-copy-result="character-sheet"></span>
