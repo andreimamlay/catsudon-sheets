@@ -9,7 +9,7 @@ namespace CatsUdon.CharacterSheets.Adapters.DndJp;
 
 public partial class DndJpAdapter(HttpClient httpClient) : ICharacterSheetAdapter
 {
-    [GeneratedRegex(@"^https\:\/\/dndjp.sakura.ne.jp\/OUTPUT.php\?ID=(\d+)$")]
+    [GeneratedRegex(@"^https:\/\/dndjp\.sakura\.ne\.jp\/OUTPUT\.php\?ID=(\d+)$")]
     private static partial Regex UrlMatchRegex { get; }
 
     [GeneratedRegex(@"^(?<attackName>.*)\s*(?<attackBonus>[\+\-]?(\d+))\s*(?<damage>\d+d\d+[\+\-]?\d*)$")]
