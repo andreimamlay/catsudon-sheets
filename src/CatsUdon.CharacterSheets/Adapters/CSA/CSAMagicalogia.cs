@@ -1,6 +1,6 @@
 ﻿using CatsUdon.CharacterSheets.Adapters.Abstractions;
 using CatsUdon.CharacterSheets.CCFolia;
-using CatsUdon.CharacterSheets.TextSheets.Grid;
+using CatsUdon.CharacterSheets.TextSheets;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
@@ -9,7 +9,7 @@ namespace CatsUdon.CharacterSheets.Adapters.CSA;
 
 public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSheetAdapter
 {
-    [GeneratedRegex(@"^https:\/\/character-sheets\.appspot\.com\/mglg\/edit\.html\?key=(?<key>\w+)$")]
+    [GeneratedRegex(@"^https:\/\/character-sheets\.appspot\.com\/mglg\/edit\.html\?key=(?<key>[\w_\-]+)$")]
     private static partial Regex UrlMatchRegex { get; }
 
     [GeneratedRegex(@"^skills\.row(?<row>\d+)\.name(?<column>\d+)$")]
@@ -49,23 +49,23 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
 
     private string CreateMemo(Character character, CharacterJson characterJson)
     {
-        var grid = new Grid(11, 6);
-        grid.Fill(Skills);
-
-        throw new NotImplementedException();
+        return string.Empty;
     }
 
     private void ReadCharacter(Character character, CharacterJson characterJson)
     {
         character.CoverName = characterJson.Base.CoverName ?? string.Empty;
         character.MagicName = characterJson.Base.MagicName ?? string.Empty;
+        if (int.TryParse(characterJson.Magic.Max, out var maxMagic)) character.MaxMagic = maxMagic;
+        if (int.TryParse(characterJson.Magic.Temp, out var tempMagic)) character.TempMagic = tempMagic;
+        if (int.TryParse(characterJson.Magic.Value, out var currentMagic)) character.CurrentMagic = currentMagic;
 
         var skills = new List<(int row, int column)>();
 
         foreach (var learnedSkill in characterJson.Learned)
         {
             if (string.IsNullOrWhiteSpace(learnedSkill.Id)) continue;
-            
+
             var match = SkillRcRegex.Match(learnedSkill.Id);
             if (!match.Success) continue;
 
@@ -73,12 +73,37 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
         }
 
         var skillsSorted = skills.OrderBy(s => s.row).ThenBy(s => s.column);
-        character.Skills = [.. skillsSorted.Select(s => Skills[s.row][s.column])];
+        character.Skills = [.. skillsSorted];
+        var domainIndex = characterJson.Base.Domain switch
+        {
+            "a" => 0,
+            "ab" => 1,
+            "bc" => 2,
+            "cd" => 3,
+            "de" => 4,
+            "e" => 5,
+            _ => throw new ArgumentOutOfRangeException(nameof(characterJson.Base.Domain), characterJson.Base.Domain, "Unknown value")
+        };
+
+        character.Domain = domainIndex;
     }
 
     private List<string> CreateTextSheets(Character character)
     {
-        throw new NotImplementedException();
+        var sheets = new List<string>();
+
+        var grid = new Grid(DomainsAndSkills.Length, DomainsAndSkills[0].Length);
+        grid.Fill(DomainsAndSkills);
+        grid.Columns[character.Domain] = true;
+
+        foreach (var skill in character.Skills)
+        {
+            grid.Cells[skill.row + 1, skill.col].Pushed = true;
+        }
+
+        sheets.Add(grid.ToString());
+
+        return sheets;
     }
 
     private CCFoliaCharacterClipboardData ConvertToCCFoliaCharacter(Character character, string memo)
@@ -89,6 +114,9 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
             Memo = memo
         };
 
+        ccfoliaCharacter.Status.Add(new CCFoliaStatus { Label = "魔力", Value = character.CurrentMagic, Max = character.MaxMagic });
+        ccfoliaCharacter.Status.Add(new CCFoliaStatus { Label = "ー時魔力", Value = character.TempMagic, Max = 0 });
+
         return new CCFoliaCharacterClipboardData() { Data = ccfoliaCharacter };
     }
 
@@ -97,6 +125,7 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
         public required CharacterBase Base { get; set; }
         public Anchor[] Anchor { get; set; } = [];
         public LearnedSkill[] Learned { get; set; } = [];
+        public required Magic Magic { get; set; }
     }
 
     public class CharacterBase
@@ -126,10 +155,22 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
     {
         public string CoverName { get; set; } = string.Empty;
         public string MagicName { get; set; } = string.Empty;
-        public List<string> Skills { get; set; } = [];
+        public List<(int row, int col)> Skills { get; set; } = [];
+        public int Domain { get; set; }
+        public int MaxMagic { get; set; }
+        public int TempMagic { get; set; }
+        public int CurrentMagic { get; set; }
     }
 
-    private static readonly string[][] Skills = [
+    public class Magic
+    {
+        public string? Max { get; set; }
+        public string? Temp { get; set; }
+        public string? Value { get; set; }
+    }
+
+    private static readonly string[][] DomainsAndSkills = [
+        ["星", "獣", "力", "歌", "夢", "闇"],
         ["黄金", "肉", "重力", "物語", "追憶", "深淵"],
         ["大地", "蟲", "風", "旋律", "謎", "腐敗"],
         ["森", "花", "流れ", "涙", "嘘", "裏切り"],

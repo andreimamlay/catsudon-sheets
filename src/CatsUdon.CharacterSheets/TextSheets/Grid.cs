@@ -1,4 +1,4 @@
-﻿namespace CatsUdon.CharacterSheets.TextSheets.Grid;
+﻿namespace CatsUdon.CharacterSheets.TextSheets;
 
 public class Grid(int rows, int columns)
 {
@@ -10,7 +10,26 @@ public class Grid(int rows, int columns)
 
     public override string ToString()
     {
-        return "";
+        var writer = new TextSheetWriter(CatsudonTextTypes.Text);
+        for (int i = 0; i < ColumnsCount; i++)
+        {
+            var isSelected = Columns[i] || Columns.ElementAtOrDefault(i - 1);
+
+            writer.Append("LineData", i, isSelected);
+        }
+
+        var cellIndex = 0;
+        for (int c = 0; c < ColumnsCount; c++)
+        {
+            for (int r = 0; r < RowsCount; r++)
+            {
+                ref var cell = ref Cells[r, c];
+                writer.Append("Cell", cellIndex, cell.Pushed, cell.Checked, cell.Text);
+                cellIndex++;
+            }
+        }
+
+        return writer.ToString();
     }
 
     public void Fill(string[][] data)
