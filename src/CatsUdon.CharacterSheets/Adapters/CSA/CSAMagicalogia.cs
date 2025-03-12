@@ -1,15 +1,19 @@
 ﻿using CatsUdon.CharacterSheets.Adapters.Abstractions;
 using CatsUdon.CharacterSheets.CCFolia;
+using CatsUdon.CharacterSheets.TextSheets.Grid;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
-namespace CatsUdon.CharacterSheets.Adapters.CharacterSheetsAppspot;
+namespace CatsUdon.CharacterSheets.Adapters.CSA;
 
 public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSheetAdapter
 {
     [GeneratedRegex(@"^https:\/\/character-sheets\.appspot\.com\/mglg\/edit\.html\?key=(?<key>\w+)$")]
     private static partial Regex UrlMatchRegex { get; }
+
+    [GeneratedRegex(@"^skills\.row(?<row>\d+)\.name(?<column>\d+)$")]
+    private static partial Regex SkillRcRegex { get; }
 
     public bool CanConvert(string url) => UrlMatchRegex.IsMatch(url);
 
@@ -34,18 +38,42 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
 
         var character = new Character();
         ReadCharacter(character, characterJson);
+        var memo = CreateMemo(character, characterJson);
 
         return new CharacterSheet()
         {
-            Character = ConvertToCCFoliaCharacter(character),
+            Character = ConvertToCCFoliaCharacter(character, memo),
             AdditionalTextSheets = CreateTextSheets(character),
         };
+    }
+
+    private string CreateMemo(Character character, CharacterJson characterJson)
+    {
+        var grid = new Grid(11, 6);
+        grid.Fill(Skills);
+
+        throw new NotImplementedException();
     }
 
     private void ReadCharacter(Character character, CharacterJson characterJson)
     {
         character.CoverName = characterJson.Base.CoverName ?? string.Empty;
         character.MagicName = characterJson.Base.MagicName ?? string.Empty;
+
+        var skills = new List<(int row, int column)>();
+
+        foreach (var learnedSkill in characterJson.Learned)
+        {
+            if (string.IsNullOrWhiteSpace(learnedSkill.Id)) continue;
+            
+            var match = SkillRcRegex.Match(learnedSkill.Id);
+            if (!match.Success) continue;
+
+            skills.Add((int.Parse(match.Groups["row"].Value), int.Parse(match.Groups["column"].Value)));
+        }
+
+        var skillsSorted = skills.OrderBy(s => s.row).ThenBy(s => s.column);
+        character.Skills = [.. skillsSorted.Select(s => Skills[s.row][s.column])];
     }
 
     private List<string> CreateTextSheets(Character character)
@@ -53,11 +81,13 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
         throw new NotImplementedException();
     }
 
-    private CCFoliaCharacterClipboardData ConvertToCCFoliaCharacter(Character character)
+    private CCFoliaCharacterClipboardData ConvertToCCFoliaCharacter(Character character, string memo)
     {
-        var ccfoliaCharacter = new CCFoliaCharacter();
-        ccfoliaCharacter.Name = character.CoverName;
-
+        var ccfoliaCharacter = new CCFoliaCharacter
+        {
+            Name = character.CoverName,
+            Memo = memo
+        };
 
         return new CCFoliaCharacterClipboardData() { Data = ccfoliaCharacter };
     }
@@ -96,6 +126,20 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
     {
         public string CoverName { get; set; } = string.Empty;
         public string MagicName { get; set; } = string.Empty;
+        public List<string> Skills { get; set; } = [];
     }
 
+    private static readonly string[][] Skills = [
+        ["黄金", "肉", "重力", "物語", "追憶", "深淵"],
+        ["大地", "蟲", "風", "旋律", "謎", "腐敗"],
+        ["森", "花", "流れ", "涙", "嘘", "裏切り"],
+        ["道", "血", "水", "別れ", "不安", "迷い"],
+        ["海", "鱗", "波", "微笑み", "眠り", "怠惰"],
+        ["静寂", "混沌", "自由", "想い", "偶然", "歪み"],
+        ["雨", "牙", "衝撃", "勝利", "幻", "不幸"],
+        ["嵐", "叫び", "雷", "恋", "狂気", "バカ"],
+        ["太陽", "怒り", "炎", "情熱", "祈り", "悪意"],
+        ["天空", "翼", "光", "癒し", "希望", "絶望"],
+        ["異界", "エロス", "円環", "時", "未来", "死"]
+    ];
 }
