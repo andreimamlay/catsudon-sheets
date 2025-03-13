@@ -11,7 +11,7 @@
             <div class="flex gap-4">
                 <button class="rounded-md bg-blue-400 text-white w-auto pl-5 pr-5 pt-2 pb-2" type="submit">変換</button>
                 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage)) {
-                <span class="pt-2 pb-2 text-red-500">キャラシートを変換できませんでした： @Model.ErrorMessage</span>
+                    <span class="pt-2 pb-2 text-red-500">キャラシートを変換できませんでした： @Model.ErrorMessage</span>
                 }
             </div>
         </form>
@@ -27,6 +27,21 @@
                 <span class="pt-2 pb-2" data-copy-result="character-sheet"></span>
             </div>
         </div>
+    }
+
+    @if (Model.AdditionalTextSheets?.Count > 0)
+    {
+        @foreach (var (index, additionalSheet) in Model.AdditionalTextSheets.Index())
+        {
+            <div class="p-4 bg-stone-50 flex flex-col gap-4">
+                <h2>テキストシート</h2>
+                <textarea readonly data-area-id="sheet-@index" class="rounded-xl bg-white p-4 h-48 text-sm font-mono border border-stone-200">@additionalSheet</textarea>
+                <div class="flex gap-4 ">
+                    <button data-action="copy" data-copy-source="sheet-@index" class="rounded-md bg-blue-400 text-white w-auto pl-5 pr-5 pt-2 pb-2" type="button">コピー</button>
+                    <span class="pt-2 pb-2" data-copy-result="sheet-@index"></span>
+                </div>
+            </div>
+        }
     }
 </div>
 

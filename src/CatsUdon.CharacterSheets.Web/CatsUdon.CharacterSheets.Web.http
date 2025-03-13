@@ -13,3 +13,7 @@ Accept: application/json
 GET {{Host}}/api/convert/?url=https://dndjp.sakura.ne.jp/OUTPUT.php?ID=45939
 Accept: application/json
 
+###
+
+GET {{Host}}/api/convert/?url=https://character-sheets.appspot.com/mglg/edit.html?key=ahVzfmNoYXJhY3Rlci1zaGVldHMtbXByFwsSDUNoYXJhY3RlckRhdGEY05S4sgMM
+Accept: application/json
