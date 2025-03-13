@@ -2,6 +2,7 @@
 using CatsUdon.CharacterSheets.CCFolia;
 using CatsUdon.CharacterSheets.TextSheets;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
@@ -49,7 +50,95 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
 
     private string CreateMemo(Character character, CharacterJson characterJson)
     {
-        return string.Empty;
+        var builder = new StringBuilder();
+        builder.Append("<size=12>");
+
+        var parts = new List<string>();
+        var firstLine = true;
+        foreach (var (index, librarySkill) in characterJson.Library.Index())
+        {
+            parts.Clear();
+
+            if (string.IsNullOrWhiteSpace(librarySkill.Name)) continue;
+
+            var nameParts = librarySkill.Name.Split('\n');
+            parts.Add($"▷ {nameParts[0]}");
+            if (nameParts.Length > 1) parts.Add($"【{nameParts[1]}】");
+
+            parts.Add(Append("特技", librarySkill.Skill));
+            parts.Add(Append("目標", librarySkill.Target));
+            parts.Add(Append("コスト", librarySkill.Cost));
+
+            if (!string.IsNullOrWhiteSpace(librarySkill.Effect)) parts.Add("\n" + librarySkill.Effect.Trim());
+
+            if (firstLine)
+            {
+                firstLine = false;
+                builder.Append("<size=16>■ 蔵書</size>\n");
+            }
+
+            builder.Append(string.Join("  ", parts.Where(p => !string.IsNullOrWhiteSpace(p))));
+            builder.Append('\n');
+            if (index < characterJson.Library.Length - 1)
+            {
+                builder.Append('\n');
+            }
+        }
+
+        if (!firstLine)
+        {
+            builder.Append('\n');
+            builder.Append('\n');
+        }
+
+        firstLine = true;
+        foreach (var (index, anchor) in characterJson.Anchor.Index())
+        {
+            parts.Clear();
+
+            if (string.IsNullOrWhiteSpace(anchor.Name)) continue;
+
+            var nameParts = anchor.Name.Split('\n');
+            parts.Add($"▷ {nameParts[0]}");
+            if (nameParts.Length > 1) parts.Add($"【{nameParts[1]}】");
+
+            parts.Add(Append("運命", anchor.Destiny));
+            parts.Add(Append("属性", anchor.Attribute));
+            if (!string.IsNullOrWhiteSpace(anchor.Memo)) parts.Add("\n" + anchor.Memo.Trim());
+
+            if (firstLine)
+            {
+                firstLine = false;
+                builder.Append("<size=16>■ 関係</size>\n");
+            }
+
+            builder.Append(string.Join("  ", parts.Where(p => !string.IsNullOrWhiteSpace(p))));
+            builder.Append('\n');
+            if (index < characterJson.Library.Length - 1)
+            {
+                builder.Append('\n');
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(characterJson.Base.Memo))
+        {
+            builder.Append("<size=16>■ 設定</size>\n");
+            builder.Append(characterJson.Base.Memo);
+            builder.Append('\n');
+        }
+
+        builder.Append('\n');
+        builder.Append('\n');
+
+        builder.Append("</size>");
+
+        return builder.ToString();
+
+        static string Append(string prefix, string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+            return $"{prefix}: {text}";
+        }
     }
 
     private void ReadCharacter(Character character, CharacterJson characterJson)
@@ -59,6 +148,9 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
         if (int.TryParse(characterJson.Magic.Max, out var maxMagic)) character.MaxMagic = maxMagic;
         if (int.TryParse(characterJson.Magic.Temp, out var tempMagic)) character.TempMagic = tempMagic;
         if (int.TryParse(characterJson.Magic.Value, out var currentMagic)) character.CurrentMagic = currentMagic;
+        if (int.TryParse(characterJson.Base.Attack, out var attack)) character.Attack = attack;
+        if (int.TryParse(characterJson.Base.Defense, out var defense)) character.Defense = defense;
+        if (int.TryParse(characterJson.Base.Source, out var source)) character.Source = source;
 
         var skills = new List<(int row, int column)>();
 
@@ -74,6 +166,7 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
 
         var skillsSorted = skills.OrderBy(s => s.row).ThenBy(s => s.column);
         character.Skills = [.. skillsSorted];
+        character.Library = characterJson.Library;
         var domainIndex = characterJson.Base.Domain switch
         {
             "a" => 0,
@@ -117,6 +210,19 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
         ccfoliaCharacter.Status.Add(new CCFoliaStatus { Label = "魔力", Value = character.CurrentMagic, Max = character.MaxMagic });
         ccfoliaCharacter.Status.Add(new CCFoliaStatus { Label = "ー時魔力", Value = character.TempMagic, Max = 0 });
 
+        ccfoliaCharacter.Params.Add(new CCFoliaParameter { Label = "攻撃力 ", Value = character.Attack.ToString() });
+        ccfoliaCharacter.Params.Add(new CCFoliaParameter { Label = "防御力 ", Value = character.Attack.ToString() });
+        ccfoliaCharacter.Params.Add(new CCFoliaParameter { Label = "根源力 ", Value = character.Attack.ToString() });
+
+        foreach (var librarySkill in character.Library)
+        {
+            var skillName = librarySkill.Name?.Split("\n")[0] ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(skillName)) continue;
+            if (librarySkill.Cost == "なし") continue;
+
+            ccfoliaCharacter.Status.Add(new CCFoliaStatus { Label = skillName, Value = 0, Max = character.Source });
+        }
+
         return new CCFoliaCharacterClipboardData() { Data = ccfoliaCharacter };
     }
 
@@ -126,6 +232,7 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
         public Anchor[] Anchor { get; set; } = [];
         public LearnedSkill[] Learned { get; set; } = [];
         public required Magic Magic { get; set; }
+        public LibrarySkill[] Library { get; set; } = [];
     }
 
     public class CharacterBase
@@ -135,6 +242,10 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
         public string? CoverName { get; set; }
         [JsonPropertyName("magicname")]
         public string? MagicName { get; set; }
+        public string? Attack { get; set; }
+        public string? Defense { get; set; }
+        public string? Source { get; set; }
+        public string? Memo { get; set; }
     }
 
     public class Anchor
@@ -151,6 +262,16 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
         public string? Judge { get; set; }
     }
 
+    public class LibrarySkill
+    {
+        public string? Cost { get; set; }
+        public string? Effect { get; set; }
+        public string? Name { get; set; }
+        public string? Skill { get; set; }
+        public string? Target { get; set; }
+        public string? Type { get; set; }
+    }
+
     public class Character
     {
         public string CoverName { get; set; } = string.Empty;
@@ -160,6 +281,10 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
         public int MaxMagic { get; set; }
         public int TempMagic { get; set; }
         public int CurrentMagic { get; set; }
+        public int Attack { get; set; }
+        public int Defense { get; set; }
+        public int Source { get; set; }
+        public LibrarySkill[] Library { get; set; } = [];
     }
 
     public class Magic
