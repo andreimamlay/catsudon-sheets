@@ -220,7 +220,7 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
             if (string.IsNullOrWhiteSpace(skillName)) continue;
             if (librarySkill.Cost == "なし") continue;
 
-            ccfoliaCharacter.Status.Add(new CCFoliaStatus { Label = skillName, Value = 0, Max = character.Source });
+            ccfoliaCharacter.Status.Add(new CCFoliaStatus { Label = $"{skillName}:{librarySkill.Cost ?? "なし"}", Value = 0, Max = character.Source });
         }
 
         return new CCFoliaCharacterClipboardData() { Data = ccfoliaCharacter };
