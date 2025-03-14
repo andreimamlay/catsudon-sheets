@@ -16,6 +16,9 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
     [GeneratedRegex(@"^skills\.row(?<row>\d+)\.name(?<column>\d+)$")]
     private static partial Regex SkillRcRegex { get; }
 
+    [GeneratedRegex(@"[ヶ々〆〇〻㐂-頻]+")]
+    private static partial Regex SkillNameRegex { get; }
+
     public bool CanConvert(string url) => UrlMatchRegex.IsMatch(url);
 
     public async Task<CharacterSheet> Convert(string url)
@@ -59,11 +62,26 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
         {
             parts.Clear();
 
-            if (string.IsNullOrWhiteSpace(librarySkill.Name)) continue;
+            if (string.IsNullOrWhiteSpace(librarySkill.Name)) break;
 
-            var nameParts = librarySkill.Name.Split('\n');
-            parts.Add($"▷ {nameParts[0]}");
-            if (nameParts.Length > 1) parts.Add($"【{nameParts[1]}】");
+            var isEmpty = string.IsNullOrWhiteSpace(librarySkill.Skill)
+                && string.IsNullOrWhiteSpace(librarySkill.Target)
+                && string.IsNullOrWhiteSpace(librarySkill.Cost)
+                && string.IsNullOrWhiteSpace(librarySkill.Effect);
+
+            if (isEmpty) continue;
+
+            var skillNameMatch = SkillNameRegex.Match(librarySkill.Name);
+            if (!skillNameMatch.Success)
+            {
+                parts.Add($"▷ {librarySkill.Name.Replace('\n', ' ').Trim()}");
+            }
+            else
+            {
+                var nameParts = librarySkill.Name.Split(['\n', '/'], StringSplitOptions.RemoveEmptyEntries);
+                parts.Add($"▷ {skillNameMatch.Value}");
+                if (nameParts.Length > 1) parts.Add($"【{nameParts[1].Trim()}】");
+            }
 
             parts.Add(Append("特技", librarySkill.Skill));
             parts.Add(Append("目標", librarySkill.Target));
@@ -189,9 +207,14 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
         grid.Fill(DomainsAndSkills);
         grid.Columns[character.Domain] = true;
 
-        foreach (var skill in character.Skills)
+        for (int c = 0; c < DomainsAndSkills[0].Length; c++)
         {
-            grid.Cells[skill.row + 1, skill.col].Pushed = true;
+            grid.Cells[0, c].Pushed = true;
+        }
+
+        foreach (var (row, col) in character.Skills)
+        {
+            grid.Cells[row + 1, col].Pushed = true;
         }
 
         sheets.Add(grid.ToString());
@@ -214,13 +237,21 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
         ccfoliaCharacter.Params.Add(new CCFoliaParameter { Label = "防御力 ", Value = character.Attack.ToString() });
         ccfoliaCharacter.Params.Add(new CCFoliaParameter { Label = "根源力 ", Value = character.Attack.ToString() });
 
-        foreach (var librarySkill in character.Library)
+        // Skip 緊急召喚
+        foreach (var librarySkill in character.Library.Skip(1))
         {
-            var skillName = librarySkill.Name?.Split("\n")[0] ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(skillName)) continue;
-            if (librarySkill.Cost == "なし") continue;
+            if (string.IsNullOrWhiteSpace(librarySkill.Name)) break;
+            var skillNameMatch = SkillNameRegex.Match(librarySkill.Name);
+            if (!skillNameMatch.Success) continue;
 
-            ccfoliaCharacter.Status.Add(new CCFoliaStatus { Label = $"{skillName}:{librarySkill.Cost ?? "なし"}", Value = 0, Max = character.Source });
+            var isEmpty = string.IsNullOrWhiteSpace(librarySkill.Skill)
+                && string.IsNullOrWhiteSpace(librarySkill.Target)
+                && string.IsNullOrWhiteSpace(librarySkill.Cost)
+                && string.IsNullOrWhiteSpace(librarySkill.Effect);
+
+            if (isEmpty) continue;
+
+            ccfoliaCharacter.Status.Add(new CCFoliaStatus { Label = $"{skillNameMatch.Value}:{librarySkill.Cost ?? "なし"}", Value = 0, Max = character.Source });
         }
 
         return new CCFoliaCharacterClipboardData() { Data = ccfoliaCharacter };
