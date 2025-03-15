@@ -17,3 +17,8 @@ Accept: application/json
 
 GET {{Host}}/api/convert/?url=https://character-sheets.appspot.com/mglg/edit.html?key=ahVzfmNoYXJhY3Rlci1zaGVldHMtbXByFwsSDUNoYXJhY3RlckRhdGEY05S4sgMM
 Accept: application/json
+
+###
+
+GET {{Host}}/api/convert/?url=https://charasheet.vampire-blood.net/5348722
+Accept: application/json

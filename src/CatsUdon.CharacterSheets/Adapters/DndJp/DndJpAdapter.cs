@@ -70,7 +70,7 @@ public partial class DndJpAdapter(HttpClient httpClient) : ICharacterSheetAdapte
 
         foreach (var (ability, score) in character.AbilityScores)
         {
-            data.Params.Add(new CCFoliaParameter() { Label = Translate.ToJapaneese(ability), Value = score.Value.ToString() });
+            data.Params.Add(new CCFoliaParameter() { Label = Translate.ToJp(ability), Value = score.Value.ToString() });
         }
 
         data.Params.Add(new CCFoliaParameter() { Label = "受動知覚", Value = character.PassivePerception.ToString() });
@@ -111,7 +111,7 @@ public partial class DndJpAdapter(HttpClient httpClient) : ICharacterSheetAdapte
             commands.AppendLine("===========  セーヴィングスロー  ==========");
             foreach (var (ability, modifier) in character.SavingThrows)
             {
-                commands.AppendLine($"1d20{modifier} 【{Translate.ToJapaneese(ability)}】セーヴィングスロー");
+                commands.AppendLine($"1d20{modifier} 【{Translate.ToJp(ability)}】セーヴィングスロー");
             }
         }
 
@@ -120,7 +120,7 @@ public partial class DndJpAdapter(HttpClient httpClient) : ICharacterSheetAdapte
             commands.AppendLine("=============  能力値判定  ===============");
             foreach (var (ability, modifier) in character.AbilityScores)
             {
-                commands.AppendLine($"1d20{modifier} 【{Translate.ToJapaneese(ability)}】能力値判定");
+                commands.AppendLine($"1d20{modifier} 【{Translate.ToJp(ability)}】能力値判定");
             }
         }
 
@@ -129,7 +129,7 @@ public partial class DndJpAdapter(HttpClient httpClient) : ICharacterSheetAdapte
             commands.AppendLine("=============  技能判定  ================");
             foreach (var (skill, die) in character.Skills)
             {
-                commands.AppendLine($"{die} 【{Translate.ToJapaneese(skill)}】技能判定");
+                commands.AppendLine($"{die} 【{Translate.ToJp(skill)}】技能判定");
             }
         }
 

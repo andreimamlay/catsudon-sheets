@@ -1,7 +1,7 @@
 ﻿namespace CatsUdon.CharacterSheets.Adapters.DndJp;
 public static class Translate
 {
-    public static string ToJapaneese(Ability ability)
+    public static string ToJp(Ability ability)
     {
         return ability switch
         {
@@ -14,7 +14,7 @@ public static class Translate
             _ => throw new ArgumentOutOfRangeException(nameof(ability), ability, null)
         };
     }
-    public static string ToJapaneese(Skill skill)
+    public static string ToJp(Skill skill)
     {
         return skill switch
         {

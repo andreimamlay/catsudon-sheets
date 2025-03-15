@@ -203,7 +203,7 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
     {
         var sheets = new List<string>();
 
-        var grid = new Grid(DomainsAndSkills.Length, DomainsAndSkills[0].Length);
+        var grid = new Grid();
         grid.Fill(DomainsAndSkills);
         grid.Columns[character.Domain] = true;
 

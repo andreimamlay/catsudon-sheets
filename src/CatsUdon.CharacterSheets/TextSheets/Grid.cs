@@ -1,12 +1,14 @@
 ﻿namespace CatsUdon.CharacterSheets.TextSheets;
 
-public class Grid(int rows, int columns)
+public class Grid
 {
-    public Cell[,] Cells { get; private set; } = new Cell[rows, columns];
-    public bool[] Columns { get; private set; } = new bool[columns];
 
-    public int RowsCount { get; } = rows;
-    public int ColumnsCount { get; } = columns;
+    public Cell[,] Cells { get; private set; } = new Cell[RowsCount, ColumnsCount];
+    public bool[] Columns { get; private set; } = new bool[ColumnsCount];
+
+    public const int RowsCount = 12;
+
+    public const int ColumnsCount = 6;
 
     public override string ToString()
     {
@@ -60,5 +62,10 @@ public class Grid(int rows, int columns)
         public string Text { get; set; }
         public bool Pushed { get; set; }
         public bool Checked { get; set; }
+
+        public Cell()
+        {
+            Text = string.Empty;
+        }
     }
 }
