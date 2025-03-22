@@ -1,8 +1,8 @@
 ﻿using CatsUdon.CharacterSheets.Adapters.Abstractions;
 using CatsUdon.CharacterSheets.CCFolia;
+using CatsUdon.CharacterSheets.Memo;
 using CatsUdon.CharacterSheets.TextSheets;
 using System.Net.Http.Json;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace CatsUdon.CharacterSheets.Adapters.CSA;
@@ -47,17 +47,15 @@ public partial class CSAShinobigamiAdapter(HttpClient httpClient) : ICharacterSh
         };
     }
 
-    private string CreateMemo(Character character, CharacterJson characterJson)
+    private static string CreateMemo(Character character, CharacterJson characterJson)
     {
-        var builder = new StringBuilder();
-        builder.Append("<size=12>");
+        using var memoBuilder = new MemoBuilder();
 
-        var parts = new List<string>();
-        var firstLine = true;
-        foreach (var (index, ninjutsuSkill) in characterJson.Ninpou.Index())
+        memoBuilder.BeginSize(12);
+        memoBuilder.Header("忍法");
+
+        foreach (var ninjutsuSkill in characterJson.Ninpou)
         {
-            parts.Clear();
-
             if (string.IsNullOrWhiteSpace(ninjutsuSkill.Name)) break;
 
             var isEmpty = string.IsNullOrWhiteSpace(ninjutsuSkill.Range)
@@ -66,87 +64,61 @@ public partial class CSAShinobigamiAdapter(HttpClient httpClient) : ICharacterSh
                 && string.IsNullOrWhiteSpace(ninjutsuSkill.Effect);
 
             if (isEmpty) continue;
-            
-            parts.Add($"▷ 【{ninjutsuSkill.Name.Replace('\n', ' ').Trim()}】");
-            parts.Add(Append("タイプ", ninjutsuSkill.Type));
-            parts.Add(Append("指定特技", ninjutsuSkill.TargetSkill));
-            parts.Add(Append("間合", ninjutsuSkill.Range));
-            parts.Add(Append("コスト", ninjutsuSkill.Cost));
 
-            if (!string.IsNullOrWhiteSpace(ninjutsuSkill.Effect)) parts.Add("\n" + ninjutsuSkill.Effect.Trim());
+            memoBuilder.Text($"▷ 【{ninjutsuSkill.Name.Replace('\n', ' ').Trim()}】")
+                .TextPrefixedOptional("  タイプ", ninjutsuSkill.Type)
+                .IfNotEmpty(ninjutsuSkill.TargetSkill, $"  指定特技：<b>{ninjutsuSkill.TargetSkill}</b>")
+                .TextPrefixedOptional("  間合", ninjutsuSkill.Range)
+                .TextPrefixedOptional("  コスト", ninjutsuSkill.Cost);
 
-            if (firstLine)
+            if (!string.IsNullOrWhiteSpace(ninjutsuSkill.Effect))
             {
-                firstLine = false;
-                builder.Append("<size=16>■ 忍法</size>\n");
+                memoBuilder.NewLine().Text("       ").Text(ninjutsuSkill.Effect);
             }
 
-            builder.Append(string.Join("  ", parts.Where(p => !string.IsNullOrWhiteSpace(p))));
-            builder.Append('\n');
-            if (index < characterJson.Ninpou.Length - 1)
-            {
-                builder.Append('\n');
-            }
+            memoBuilder.NewLine();
         }
 
-        if (!firstLine)
+        memoBuilder.NewLine();
+        memoBuilder.Header("背景");
+        if (characterJson.Background.Length == 0)
         {
-            builder.Append('\n');
-            builder.Append('\n');
+            memoBuilder.Text("なし");
         }
 
-        firstLine = true;
         foreach (var (index, background) in characterJson.Background.Index())
         {
-            parts.Clear();
+            if (string.IsNullOrWhiteSpace(background.Name)) break;
 
-            if (string.IsNullOrWhiteSpace(background.Name)) continue;
+            memoBuilder.Text($"▷ {background.Name}")
+                .TextPrefixedOptional("  種別", background.Type)
+                .TextPrefixedOptional("  功績点", background.Point);
 
-            parts.Add($"▷ {background.Name}");
-
-            parts.Add(Append("種別", background.Type));
-            parts.Add(Append("功績点", background.Point));
-            if (!string.IsNullOrWhiteSpace(background.Effect)) parts.Add("\n" + background.Effect.Trim());
-
-            if (firstLine)
+            if (!string.IsNullOrWhiteSpace(background.Effect))
             {
-                firstLine = false;
-                builder.Append("<size=16>■ 背景</size>\n");
+                memoBuilder.NewLine().Text("     ").Text(background.Effect);
             }
 
-            builder.Append(string.Join("  ", parts.Where(p => !string.IsNullOrWhiteSpace(p))));
-            builder.Append('\n');
-            if (index < characterJson.Background.Length - 1)
-            {
-                builder.Append('\n');
-            }
+            memoBuilder.NewLine();
         }
 
         if (!string.IsNullOrWhiteSpace(characterJson.Base.Memo))
         {
-            builder.Append("<size=16>■ 設定</size>\n");
-            builder.Append(characterJson.Base.Memo);
-            builder.Append('\n');
+            memoBuilder.NewLine();
+            memoBuilder.Header("設定");
+            memoBuilder.Text(characterJson.Base.Memo.Trim());
         }
 
-        builder.Append('\n');
-        builder.Append('\n');
+        memoBuilder.NewLine().NewLine();
+        memoBuilder.EndSize();
 
-        builder.Append("</size>");
-
-        return builder.ToString();
-
-        static string Append(string prefix, string? text)
-        {
-            if (string.IsNullOrWhiteSpace(text)) return string.Empty;
-            return $"{prefix}: {text}";
-        }
+        return memoBuilder.ToString();
     }
 
-    private void ReadCharacter(Character character, CharacterJson characterJson)
+    private static void ReadCharacter(Character character, CharacterJson characterJson)
     {
-        character.Name = characterJson.Base.Name ?? string.Empty;
-        character.NameKana = characterJson.Base.NameKana ?? string.Empty;
+        character.Name = characterJson.Base.Name?.Replace("　", " ") ?? string.Empty;
+        character.NameKana = characterJson.Base.NameKana?.Replace("　", " ") ?? string.Empty;
 
         var skills = new List<(int row, int column)>();
 
@@ -177,7 +149,7 @@ public partial class CSAShinobigamiAdapter(HttpClient httpClient) : ICharacterSh
         character.Style = styleIndex;
     }
 
-    private List<string> CreateTextSheets(Character character)
+    private static List<string> CreateTextSheets(Character character)
     {
         var sheets = new List<string>();
 
@@ -200,13 +172,13 @@ public partial class CSAShinobigamiAdapter(HttpClient httpClient) : ICharacterSh
         return sheets;
     }
 
-    private CCFoliaCharacterClipboardData ConvertToCCFoliaCharacter(Character character, string memo)
+    private static CCFoliaCharacterClipboardData ConvertToCCFoliaCharacter(Character character, string memo)
     {
         string characterName;
         if (!string.IsNullOrWhiteSpace(character.NameKana) && character.Name != character.NameKana)
         {
             characterName = $"{character.Name}（{character.NameKana}）";
-        } 
+        }
         else
         {
             characterName = character.Name;
@@ -218,6 +190,9 @@ public partial class CSAShinobigamiAdapter(HttpClient httpClient) : ICharacterSh
             Memo = memo
         };
 
+        ccfoliaCharacter.Status.Add(new CCFoliaStatus() { Label = "生命力", Value = 5, Max = 5 });
+        ccfoliaCharacter.Status.Add(new CCFoliaStatus() { Label = "追加生命力", Value = 0, Max = 0 });
+
         return new CCFoliaCharacterClipboardData() { Data = ccfoliaCharacter };
     }
 
@@ -226,7 +201,7 @@ public partial class CSAShinobigamiAdapter(HttpClient httpClient) : ICharacterSh
         public required CharacterBase Base { get; set; }
         public LearnedSkill[] Learned { get; set; } = [];
         public NinjutsuSkill[] Ninpou { get; set; } = [];
-        public Background[] Background {  get; set; } = [];
+        public Background[] Background { get; set; } = [];
     }
 
     public class CharacterBase

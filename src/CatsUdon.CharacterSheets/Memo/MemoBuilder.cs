@@ -1,10 +1,14 @@
-﻿using System.Text;
+﻿using Microsoft.Extensions.ObjectPool;
+using System.Text;
 
 namespace CatsUdon.CharacterSheets.Memo;
 
-public class MemoBuilder
+public class MemoBuilder : IDisposable
 {
-    private readonly StringBuilder stringBuilder = new();
+    private static readonly ObjectPool<StringBuilder> stringBuilderPool = ObjectPool.Create(new DefaultPooledObjectPolicy<StringBuilder>());
+
+    private readonly StringBuilder stringBuilder = stringBuilderPool.Get();
+    private bool disposedValue;
 
     public MemoBuilder BeginSize(int size)
     {
@@ -40,6 +44,16 @@ public class MemoBuilder
         return Text($"{prefix}：{text}");
     }
 
+    public MemoBuilder IfNotEmpty(string? text, string textToWrite)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return this;
+        }
+
+        return Text(textToWrite);
+    }
+
     public MemoBuilder Header(string header)
     {
         BeginSize(16);
@@ -59,4 +73,25 @@ public class MemoBuilder
     }
 
     public override string ToString() => stringBuilder.ToString();
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                stringBuilder.Clear();
+                stringBuilderPool.Return(stringBuilder);
+            }
+
+            disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 }

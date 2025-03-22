@@ -73,7 +73,7 @@ public static class NechronicaConverter
 
     private static string CreateMemo(Character character)
     {
-        var memoBuilder = new MemoBuilder();
+        using var memoBuilder = new MemoBuilder();
 
         memoBuilder.BeginSize(12);
 
