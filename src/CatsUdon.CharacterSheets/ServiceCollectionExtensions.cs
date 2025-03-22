@@ -1,7 +1,9 @@
 ﻿using CatsUdon.CharacterSheets.Adapters.Abstractions;
-using CatsUdon.CharacterSheets.Adapters.DndJp;
+using CatsUdon.CharacterSheets.Memo;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.ObjectPool;
+using System.Text;
 
 namespace CatsUdon.CharacterSheets;
 

@@ -1,8 +1,8 @@
 ﻿using CatsUdon.CharacterSheets.Adapters.Abstractions;
 using CatsUdon.CharacterSheets.CCFolia;
+using CatsUdon.CharacterSheets.Memo;
 using CatsUdon.CharacterSheets.TextSheets;
 using System.Net.Http.Json;
-using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
@@ -53,15 +53,13 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
 
     private string CreateMemo(Character character, CharacterJson characterJson)
     {
-        var builder = new StringBuilder();
-        builder.Append("<size=12>");
+        using var memoBuilder = new MemoBuilder();
 
-        var parts = new List<string>();
-        var firstLine = true;
-        foreach (var (index, librarySkill) in characterJson.Library.Index())
+        memoBuilder.BeginSize(12);
+        memoBuilder.Header("蔵書");
+
+        foreach (var librarySkill in characterJson.Library)
         {
-            parts.Clear();
-
             if (string.IsNullOrWhiteSpace(librarySkill.Name)) break;
 
             var isEmpty = string.IsNullOrWhiteSpace(librarySkill.Skill)
@@ -74,89 +72,70 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
             var skillNameMatch = SkillNameRegex.Match(librarySkill.Name);
             if (!skillNameMatch.Success)
             {
-                parts.Add($"▷ {librarySkill.Name.Replace('\n', ' ').Trim()}");
+                memoBuilder.Text($"▷ 【{librarySkill.Name.Replace('\n', ' ').Trim()}】");
             }
             else
             {
                 var nameParts = librarySkill.Name.Split(['\n', '/'], StringSplitOptions.RemoveEmptyEntries);
-                parts.Add($"▷ {skillNameMatch.Value}");
-                if (nameParts.Length > 1) parts.Add($"【{nameParts[1].Trim()}】");
+                if (nameParts.Length == 1)
+                {
+                    memoBuilder.Text($"▷ {skillNameMatch.Value}");
+                }
+                else
+                {
+                    memoBuilder.Text($"▷ {skillNameMatch.Value} 【{nameParts[1].Trim()}】");
+                }
             }
 
-            parts.Add(Append("特技", librarySkill.Skill));
-            parts.Add(Append("目標", librarySkill.Target));
-            parts.Add(Append("コスト", librarySkill.Cost));
 
-            if (!string.IsNullOrWhiteSpace(librarySkill.Effect)) parts.Add("\n" + librarySkill.Effect.Trim());
+            memoBuilder
+                .TextPrefixedOptional("  タイプ", librarySkill.Type)
+                .IfNotEmpty(librarySkill.Skill, $"  特技：<b>{librarySkill.Skill}</b>")
+                .TextPrefixedOptional("  目標", librarySkill.Target)
+                .TextPrefixedOptional("  コスト", librarySkill.Cost);
 
-            if (firstLine)
+            if (!string.IsNullOrWhiteSpace(librarySkill.Effect))
             {
-                firstLine = false;
-                builder.Append("<size=16>■ 蔵書</size>\n");
+                memoBuilder.NewLine().Text("     ").Text(librarySkill.Effect);
             }
 
-            builder.Append(string.Join("  ", parts.Where(p => !string.IsNullOrWhiteSpace(p))));
-            builder.Append('\n');
-            if (index < characterJson.Library.Length - 1)
-            {
-                builder.Append('\n');
-            }
+            memoBuilder.NewLine();
         }
 
-        if (!firstLine)
-        {
-            builder.Append('\n');
-            builder.Append('\n');
-        }
+        memoBuilder.Header("関係");
 
-        firstLine = true;
         foreach (var (index, anchor) in characterJson.Anchor.Index())
         {
-            parts.Clear();
-
             if (string.IsNullOrWhiteSpace(anchor.Name)) continue;
 
             var nameParts = anchor.Name.Split('\n');
-            parts.Add($"▷ {nameParts[0]}");
-            if (nameParts.Length > 1) parts.Add($"【{nameParts[1]}】");
-
-            parts.Add(Append("運命", anchor.Destiny));
-            parts.Add(Append("属性", anchor.Attribute));
-            if (!string.IsNullOrWhiteSpace(anchor.Memo)) parts.Add("\n" + anchor.Memo.Trim());
-
-            if (firstLine)
+            if (nameParts.Length == 1)
             {
-                firstLine = false;
-                builder.Append("<size=16>■ 関係</size>\n");
+                memoBuilder.Text($"▷ {nameParts[0]}");
+            }
+            else
+            {
+                memoBuilder.Text($"▷ {nameParts[0]} 【{nameParts[1]}】");
             }
 
-            builder.Append(string.Join("  ", parts.Where(p => !string.IsNullOrWhiteSpace(p))));
-            builder.Append('\n');
-            if (index < characterJson.Library.Length - 1)
+            memoBuilder.TextPrefixedOptional("  運命", anchor.Destiny)
+                .TextPrefixedOptional("  属性", anchor.Attribute);
+
+            if (!string.IsNullOrWhiteSpace(anchor.Memo))
             {
-                builder.Append('\n');
+                memoBuilder.NewLine().Text("     ").Text(anchor.Memo);
             }
         }
 
         if (!string.IsNullOrWhiteSpace(characterJson.Base.Memo))
         {
-            builder.Append("<size=16>■ 設定</size>\n");
-            builder.Append(characterJson.Base.Memo);
-            builder.Append('\n');
+            memoBuilder.Header("設定")
+                .Text(characterJson.Base.Memo);
         }
 
-        builder.Append('\n');
-        builder.Append('\n');
+        memoBuilder.EndSize();
 
-        builder.Append("</size>");
-
-        return builder.ToString();
-
-        static string Append(string prefix, string? text)
-        {
-            if (string.IsNullOrWhiteSpace(text)) return string.Empty;
-            return $"{prefix}: {text}";
-        }
+        return memoBuilder.ToString();
     }
 
     private void ReadCharacter(Character character, CharacterJson characterJson)
