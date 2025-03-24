@@ -18,6 +18,18 @@ public partial class DndJpAdapter(HttpClient httpClient) : ICharacterSheetAdapte
     [GeneratedRegex(@"^(?<attackName>.*)\s*(?<damage>\d+d\d+[\+\-]?\d*)$")]
     private static partial Regex NameDamageExtraAttackRegex { get; }
 
+    private static Lazy<GameSystemInfo[]> supportedSystems = new([
+        new GameSystemInfo()
+        {
+            ProviderName = "D&D総合コミュニティ",
+            ProviderHomePageUrl = new Uri("https://dndjp.sakura.ne.jp/LIST.php"),
+            GameSystemName = "D&D 5e",
+            MainPageUrl = new Uri("https://dndjp.sakura.ne.jp/LIST.php"),
+            CharacterCreationUrl = new Uri("https://dndjp.sakura.ne.jp/INPUT_FORM.php"),
+        }
+    ]);
+    public GameSystemInfo[] SupportedGameSystems => supportedSystems.Value;
+
     public bool CanConvert(string url) => UrlMatchRegex.IsMatch(url);
 
     public async Task<CharacterSheet> Convert(string url)

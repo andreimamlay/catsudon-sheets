@@ -1,3 +1,6 @@
-﻿@{
+﻿@using CatsUdon.CharacterSheets.Web.Infrastructure
+@inject CommitHashProvider CommitHashProvider
+@{
     Layout = "_Layout";
+    ViewData["CommitHash"] = CommitHashProvider.CommitHash;
 }

@@ -15,6 +15,18 @@ public partial class VampireBloodAdapter(HttpClient httpClient) : ICharacterShee
 
     private const string HeaderCharacterListCssSelector = "li.nav-link:nth-child(2) > a:nth-child(1)";
 
+    private static Lazy<GameSystemInfo[]> supportedSystems = new([
+        new GameSystemInfo()
+        {
+            ProviderName = "キャラクター保管所",
+            ProviderHomePageUrl = new Uri("https://charasheet.vampire-blood.net/"),
+            GameSystemName = " 永い後日談のネクロニカ",
+            MainPageUrl = new Uri("https://charasheet.vampire-blood.net/list_nechro.html"),
+            CharacterCreationUrl = new Uri("https://charasheet.vampire-blood.net/nechro_pc_making.html"),
+        }
+    ]);
+    public GameSystemInfo[] SupportedGameSystems => supportedSystems.Value;
+
     public bool CanConvert(string url) => UrlMatchRegex.IsMatch(url);
 
     public async Task<CharacterSheet> Convert(string url)

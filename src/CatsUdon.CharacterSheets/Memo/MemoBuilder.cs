@@ -22,9 +22,25 @@ public class MemoBuilder : IDisposable
         return this;
     }
 
-    public MemoBuilder NewLine()
+    public MemoBuilder BeginMargin(string size = "2em")
     {
-        stringBuilder.Append('\n');
+        stringBuilder.Append($"<margin={size}>");
+        return this;
+    }
+
+    public MemoBuilder EndMargin()
+    {
+        stringBuilder.Append($"</margin>");
+        return this;
+    }
+
+    public MemoBuilder NewLine(int times = 1)
+    {
+        for (int i = 0; i < times; i++)
+        {
+            stringBuilder.Append('\n');
+        }
+
         return this;
     }
 

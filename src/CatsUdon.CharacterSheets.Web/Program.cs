@@ -1,4 +1,5 @@
 using CatsUdon.CharacterSheets;
+using CatsUdon.CharacterSheets.Web.Infrastructure;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 
@@ -17,6 +18,8 @@ builder.Services.AddSingleton(new JsonSerializerOptions(JsonSerializerDefaults.W
 {
     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
 });
+
+builder.Services.AddSingleton<CommitHashProvider>();
 
 var app = builder.Build();
 

@@ -15,6 +15,18 @@ public partial class CSAShinobigamiAdapter(HttpClient httpClient) : ICharacterSh
     [GeneratedRegex(@"^skills\.row(?<row>\d+)\.name(?<column>\d+)$")]
     private static partial Regex SkillRcRegex { get; }
 
+    private static Lazy<GameSystemInfo[]> supportedSystems = new([
+        new GameSystemInfo()
+        {
+            ProviderName = "キャラクターシート倉庫",
+            ProviderHomePageUrl = new Uri("https://character-sheets.appspot.com/"),
+            GameSystemName = "シノビガミ - 忍神 -",
+            MainPageUrl = new Uri("https://character-sheets.appspot.com/shinobigami/"),
+            CharacterCreationUrl = new Uri("https://character-sheets.appspot.com/shinobigami/edit.html"),
+        }
+    ]);
+    public GameSystemInfo[] SupportedGameSystems => supportedSystems.Value;
+
     public bool CanConvert(string url) => UrlMatchRegex.IsMatch(url);
 
     public async Task<CharacterSheet> Convert(string url)
@@ -73,10 +85,10 @@ public partial class CSAShinobigamiAdapter(HttpClient httpClient) : ICharacterSh
 
             if (!string.IsNullOrWhiteSpace(ninjutsuSkill.Effect))
             {
-                memoBuilder.NewLine().Text("       ").Text(ninjutsuSkill.Effect);
+                memoBuilder.NewLine().BeginMargin("2em").Text(ninjutsuSkill.Effect).EndMargin();
             }
 
-            memoBuilder.NewLine();
+            memoBuilder.NewLine(2);
         }
 
         memoBuilder.NewLine();
@@ -96,10 +108,10 @@ public partial class CSAShinobigamiAdapter(HttpClient httpClient) : ICharacterSh
 
             if (!string.IsNullOrWhiteSpace(background.Effect))
             {
-                memoBuilder.NewLine().Text("     ").Text(background.Effect);
+                memoBuilder.NewLine().BeginMargin("2em").Text(background.Effect).EndMargin();
             }
 
-            memoBuilder.NewLine();
+            memoBuilder.NewLine(2);
         }
 
         if (!string.IsNullOrWhiteSpace(characterJson.Base.Memo))
@@ -109,7 +121,7 @@ public partial class CSAShinobigamiAdapter(HttpClient httpClient) : ICharacterSh
             memoBuilder.Text(characterJson.Base.Memo.Trim());
         }
 
-        memoBuilder.NewLine().NewLine();
+        memoBuilder.NewLine(2);
         memoBuilder.EndSize();
 
         return memoBuilder.ToString();

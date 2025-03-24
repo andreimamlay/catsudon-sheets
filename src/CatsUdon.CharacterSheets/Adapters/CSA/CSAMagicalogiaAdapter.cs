@@ -19,6 +19,18 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
     [GeneratedRegex(@"[ヶ々〆〇〻㐂-頻]+")]
     private static partial Regex SkillNameRegex { get; }
 
+    private static Lazy<GameSystemInfo[]> supportedSystems = new([
+        new GameSystemInfo()
+        {
+            ProviderName = "キャラクターシート倉庫",
+            ProviderHomePageUrl = new Uri("https://character-sheets.appspot.com/"),
+            GameSystemName = "マギカロギア",
+            MainPageUrl = new Uri("https://character-sheets.appspot.com/mglg/"),
+            CharacterCreationUrl = new Uri("https://character-sheets.appspot.com/mglg/edit.html"),
+        }
+    ]);
+    public GameSystemInfo[] SupportedGameSystems => supportedSystems.Value;
+
     public bool CanConvert(string url) => UrlMatchRegex.IsMatch(url);
 
     public async Task<CharacterSheet> Convert(string url)
@@ -96,10 +108,10 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
 
             if (!string.IsNullOrWhiteSpace(librarySkill.Effect))
             {
-                memoBuilder.NewLine().Text("     ").Text(librarySkill.Effect);
+                memoBuilder.NewLine().BeginMargin("2em").Text(librarySkill.Effect).EndMargin();
             }
 
-            memoBuilder.NewLine();
+            memoBuilder.NewLine(2);
         }
 
         memoBuilder.Header("関係");
@@ -123,8 +135,10 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
 
             if (!string.IsNullOrWhiteSpace(anchor.Memo))
             {
-                memoBuilder.NewLine().Text("     ").Text(anchor.Memo);
+                memoBuilder.NewLine().BeginMargin("2em").Text(anchor.Memo).EndMargin();
             }
+
+            memoBuilder.NewLine(2);
         }
 
         if (!string.IsNullOrWhiteSpace(characterJson.Base.Memo))
