@@ -1,5 +1,5 @@
 ﻿# Stage 1: Build project
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /build
 
 ARG COMMIT_HASH
@@ -9,7 +9,7 @@ RUN dotnet publish CatsUdon.CharacterSheets.Web/CatsUdon.CharacterSheets.Web.csp
 RUN echo "$COMMIT_HASH" > out/commit_hash
 
 # Stage 2: Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build /build/out .
 RUN ln -sf /usr/share/zoneinfo/Japan /etc/localtime

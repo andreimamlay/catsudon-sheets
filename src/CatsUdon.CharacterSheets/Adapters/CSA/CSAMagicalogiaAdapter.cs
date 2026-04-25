@@ -227,8 +227,8 @@ public partial class CSAMagicalogiaAdapter(HttpClient httpClient) : ICharacterSh
         ccfoliaCharacter.Status.Add(new CCFoliaStatus { Label = "ー時魔力", Value = character.TempMagic, Max = 0 });
 
         ccfoliaCharacter.Params.Add(new CCFoliaParameter { Label = "攻撃力 ", Value = character.Attack.ToString() });
-        ccfoliaCharacter.Params.Add(new CCFoliaParameter { Label = "防御力 ", Value = character.Attack.ToString() });
-        ccfoliaCharacter.Params.Add(new CCFoliaParameter { Label = "根源力 ", Value = character.Attack.ToString() });
+        ccfoliaCharacter.Params.Add(new CCFoliaParameter { Label = "防御力 ", Value = character.Defense.ToString() });
+        ccfoliaCharacter.Params.Add(new CCFoliaParameter { Label = "根源力 ", Value = character.Source.ToString() });
 
         // Skip 緊急召喚
         foreach (var librarySkill in character.Library.Skip(1))
