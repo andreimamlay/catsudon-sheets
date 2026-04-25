@@ -1,0 +1,7 @@
+services:
+  catsudon-sheets:
+    image: ghcr.io/andreimamlay/catsudon-sheets:latest
+    container_name: catsudon-sheets
+    restart: always
+    ports:
+      - "10080:8080"
