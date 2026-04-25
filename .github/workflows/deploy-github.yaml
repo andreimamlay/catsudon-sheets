@@ -8,7 +8,7 @@ jobs:
     name: Build Docker image and publish to GitHub Container Registry
     permissions:
       contents: read
-      id-token: write
+      packages: write
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
