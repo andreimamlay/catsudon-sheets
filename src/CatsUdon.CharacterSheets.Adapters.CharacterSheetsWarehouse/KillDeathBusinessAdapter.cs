@@ -1,4 +1,5 @@
-﻿using CatsUdon.CharacterSheets.Adapters.Abstractions;
+﻿using CatsUdon.CharacterSheets.Absctractions.CCFolia;
+using CatsUdon.CharacterSheets.Adapters.Abstractions;
 using CatsUdon.CharacterSheets.CCFolia;
 using CatsUdon.CharacterSheets.Memo;
 using CatsUdon.CharacterSheets.TextSheets;
@@ -7,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace CatsUdon.CharacterSheets.Adapters.CSA;
 
-public partial class CSAKillDeathBusinessAdapter(HttpClient httpClient) : ICharacterSheetAdapter
+public partial class KillDeathBusinessAdapter(HttpClient httpClient) : ICharacterSheetAdapter
 {
     [GeneratedRegex(@"^https:\/\/character-sheets\.appspot\.com\/helltv\/edit\.html\?key=(?<key>[\w_\-]+)$")]
     private static partial Regex UrlMatchRegex { get; }

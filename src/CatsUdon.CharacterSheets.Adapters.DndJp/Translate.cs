@@ -1,5 +1,5 @@
 ﻿namespace CatsUdon.CharacterSheets.Adapters.DndJp;
-public static class Translate
+internal static class Translate
 {
     public static string ToJp(Ability ability)
     {

@@ -11,6 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CatsUdon.CharacterSheets.Adapters.CharacterSheetsWarehouse\CatsUdon.CharacterSheets.Adapters.CharacterSheetsWarehouse.csproj" />
+    <ProjectReference Include="..\CatsUdon.CharacterSheets.Adapters.DndBeyond\CatsUdon.CharacterSheets.Adapters.DndBeyond.csproj" />
+    <ProjectReference Include="..\CatsUdon.CharacterSheets.Adapters.DndJp\CatsUdon.CharacterSheets.Adapters.DndJp.csproj" />
+    <ProjectReference Include="..\CatsUdon.CharacterSheets.Adapters.VampireBlood\CatsUdon.CharacterSheets.Adapters.VampireBlood.csproj" />
     <ProjectReference Include="..\CatsUdon.CharacterSheets\CatsUdon.CharacterSheets.csproj" />
   </ItemGroup>
 

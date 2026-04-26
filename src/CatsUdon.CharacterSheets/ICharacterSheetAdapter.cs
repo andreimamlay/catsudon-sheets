@@ -1,6 +1,4 @@
-﻿using CatsUdon.CharacterSheets.CCFolia;
-
-namespace CatsUdon.CharacterSheets.Adapters.Abstractions;
+﻿namespace CatsUdon.CharacterSheets.Adapters.Abstractions;
 
 public interface ICharacterSheetAdapter
 {

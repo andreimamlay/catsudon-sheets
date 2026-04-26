@@ -1,4 +1,5 @@
-﻿namespace CatsUdon.CharacterSheets;
+﻿namespace CatsUdon.CharacterSheets.Absctractions;
+
 public readonly struct Modifier(int value)
 {
     public int Value { get; } = value;

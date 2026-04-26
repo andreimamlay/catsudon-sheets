@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
-namespace CatsUdon.CharacterSheets;
+namespace CatsUdon.CharacterSheets.Absctractions;
 public readonly partial struct Die
 {
     [GeneratedRegex(@"^(?<count>\d+)d(?<sides>\d+)(?<modifier>(\+|-)\d+)?$")]

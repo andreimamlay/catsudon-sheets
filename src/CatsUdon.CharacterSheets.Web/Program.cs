@@ -13,7 +13,10 @@ if (builder.Environment.IsDevelopment())
 
 builder.Services.AddHttpClient();
 builder.Services.AddControllers();
-builder.Services.AddCharacterSheets();
+builder.Services.AddCharacterSheetsWarehouse();
+builder.Services.AddDndJp();
+builder.Services.AddVampireBlood();
+
 builder.Services.AddSingleton(new JsonSerializerOptions(JsonSerializerDefaults.Web)
 {
     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping

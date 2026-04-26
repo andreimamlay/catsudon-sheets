@@ -1,6 +1,6 @@
 ﻿namespace CatsUdon.CharacterSheets.Adapters.VampireBlood;
 
-public static class CssSelectors
+internal static class CssSelectors
 {
     public const string CharacterName = "#pc_name";
     public const string ActionValue = "#speed_disp > div:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > input:nth-child(1)";

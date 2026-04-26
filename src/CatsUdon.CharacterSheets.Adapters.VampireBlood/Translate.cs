@@ -1,6 +1,6 @@
 ﻿namespace CatsUdon.CharacterSheets.Adapters.VampireBlood;
 
-public static class Translate
+internal static class Translate
 {
     public static string ToJp(NechronicaConverter.PartTypes partType) => partType switch
     {

@@ -1,5 +1,8 @@
-﻿namespace CatsUdon.CharacterSheets.Adapters.DndJp;
-public class Character
+﻿using CatsUdon.CharacterSheets.Absctractions;
+
+namespace CatsUdon.CharacterSheets.Adapters.DndJp;
+
+internal class Character
 {
     public string Name { get; set; } = string.Empty;
 
@@ -21,14 +24,14 @@ public class Character
     
 }
 
-public class Attack
+internal class Attack
 {
     public string Name { get; set; } = string.Empty;
     public Modifier? AttackBonus { get; set; }
     public Die Damage { get; set; }
 }
 
-public enum Ability
+internal enum Ability
 {
     /// <summary>
     /// 筋力
@@ -56,7 +59,7 @@ public enum Ability
     Charisma
 }
 
-public enum Skill
+internal enum Skill
 {
     /// <summary>
     /// 軽業

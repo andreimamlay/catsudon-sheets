@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.13.35806.99
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatsUdon.CharacterSheets", "src\CatsUdon.CharacterSheets\CatsUdon.CharacterSheets.csproj", "{0D0292EF-EC59-4747-A406-3EDA0DD2E2D7}"
 EndProject
@@ -13,6 +13,20 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatsUdon.CharacterSheets.Adapters.DndBeyond", "src\CatsUdon.CharacterSheets.Adapters.DndBeyond\CatsUdon.CharacterSheets.Adapters.DndBeyond.csproj", "{9BBB43E8-047B-4741-9BB9-127DFA5A971C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatsUdon.CharacterSheets.Adapters.DndJp", "src\CatsUdon.CharacterSheets.Adapters.DndJp\CatsUdon.CharacterSheets.Adapters.DndJp.csproj", "{44F18E8D-23CE-402C-A82B-B2B45AB25764}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatsUdon.CharacterSheets.Adapters.VampireBlood", "src\CatsUdon.CharacterSheets.Adapters.VampireBlood\CatsUdon.CharacterSheets.Adapters.VampireBlood.csproj", "{6927D6FA-30A1-48BB-AA96-2F4570B0EB16}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatsUdon.CharacterSheets.Adapters.CharacterSheetsWarehouse", "src\CatsUdon.CharacterSheets.Adapters.CharacterSheetsWarehouse\CatsUdon.CharacterSheets.Adapters.CharacterSheetsWarehouse.csproj", "{4F3E43C2-8F6C-439F-A315-A754FD05A105}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Adapters", "Adapters", "{F0A0388F-86C4-4476-A79E-2173BF9DDF03}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{94A8BBC4-7567-485E-8AB4-7502CF307BCF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AngleSharp.Extensions", "src\AngleSharp.Extensions\AngleSharp.Extensions.csproj", "{D7DBD9CE-6929-461D-874A-EDBC34D9230A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,9 +46,36 @@ Global
 		{0410D59E-FA90-4E35-9598-8E71ACD1D810}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0410D59E-FA90-4E35-9598-8E71ACD1D810}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0410D59E-FA90-4E35-9598-8E71ACD1D810}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BBB43E8-047B-4741-9BB9-127DFA5A971C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BBB43E8-047B-4741-9BB9-127DFA5A971C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BBB43E8-047B-4741-9BB9-127DFA5A971C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BBB43E8-047B-4741-9BB9-127DFA5A971C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44F18E8D-23CE-402C-A82B-B2B45AB25764}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44F18E8D-23CE-402C-A82B-B2B45AB25764}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44F18E8D-23CE-402C-A82B-B2B45AB25764}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44F18E8D-23CE-402C-A82B-B2B45AB25764}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6927D6FA-30A1-48BB-AA96-2F4570B0EB16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6927D6FA-30A1-48BB-AA96-2F4570B0EB16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6927D6FA-30A1-48BB-AA96-2F4570B0EB16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6927D6FA-30A1-48BB-AA96-2F4570B0EB16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F3E43C2-8F6C-439F-A315-A754FD05A105}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F3E43C2-8F6C-439F-A315-A754FD05A105}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F3E43C2-8F6C-439F-A315-A754FD05A105}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F3E43C2-8F6C-439F-A315-A754FD05A105}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7DBD9CE-6929-461D-874A-EDBC34D9230A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7DBD9CE-6929-461D-874A-EDBC34D9230A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7DBD9CE-6929-461D-874A-EDBC34D9230A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7DBD9CE-6929-461D-874A-EDBC34D9230A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9BBB43E8-047B-4741-9BB9-127DFA5A971C} = {F0A0388F-86C4-4476-A79E-2173BF9DDF03}
+		{44F18E8D-23CE-402C-A82B-B2B45AB25764} = {F0A0388F-86C4-4476-A79E-2173BF9DDF03}
+		{6927D6FA-30A1-48BB-AA96-2F4570B0EB16} = {F0A0388F-86C4-4476-A79E-2173BF9DDF03}
+		{4F3E43C2-8F6C-439F-A315-A754FD05A105} = {F0A0388F-86C4-4476-A79E-2173BF9DDF03}
+		{D7DBD9CE-6929-461D-874A-EDBC34D9230A} = {94A8BBC4-7567-485E-8AB4-7502CF307BCF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2D3B0C88-D855-4C01-B94C-540E85409FFE}

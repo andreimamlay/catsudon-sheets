@@ -1,5 +1,6 @@
 ﻿namespace CatsUdon.CharacterSheets.Adapters.DndJp;
-public static class CssSelectors
+
+internal static class CssSelectors
 {
     public const string CharacterName = "table.DD5ePage:nth-child(5) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1) > div:nth-child(2)";
     public const string Initiative = "table.DD5ePage:nth-child(6) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1)";

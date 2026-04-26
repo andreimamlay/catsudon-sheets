@@ -1,5 +1,6 @@
 ﻿using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
+using CatsUdon.CharacterSheets.Absctractions.CCFolia;
 using CatsUdon.CharacterSheets.Adapters.Abstractions;
 using CatsUdon.CharacterSheets.CCFolia;
 using CatsUdon.CharacterSheets.Memo;
@@ -9,7 +10,7 @@ using System.Text;
 
 namespace CatsUdon.CharacterSheets.Adapters.VampireBlood;
 
-public static class NechronicaConverter
+internal static class NechronicaConverter
 {
     public static CharacterSheet Convert(IHtmlDocument document)
     {
