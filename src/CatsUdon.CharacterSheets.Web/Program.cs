@@ -15,6 +15,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddControllers();
 builder.Services.AddCharacterSheetsWarehouse();
 builder.Services.AddDndJp();
+builder.Services.AddDndBeyond();
 builder.Services.AddVampireBlood();
 
 builder.Services.AddSingleton(new JsonSerializerOptions(JsonSerializerDefaults.Web)

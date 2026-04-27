@@ -20,7 +20,7 @@ public partial class DndJpAdapter(HttpClient httpClient) : ICharacterSheetAdapte
     [GeneratedRegex(@"^(?<attackName>.*)\s*(?<damage>\d+d\d+[\+\-]?\d*)$")]
     private static partial Regex NameDamageExtraAttackRegex { get; }
 
-    private static Lazy<GameSystemInfo[]> supportedSystems = new([
+    private static readonly Lazy<GameSystemInfo[]> supportedSystems = new([
         new GameSystemInfo()
         {
             ProviderName = "D&D総合コミュニティ",

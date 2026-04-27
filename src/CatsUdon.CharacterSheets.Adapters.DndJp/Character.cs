@@ -21,7 +21,6 @@ internal class Character
     public List<(Ability ability, Modifier modifier)> SavingThrows { get; set; } = [];
     public List<(Skill skill, Die die)> Skills { get; set; } = [];
     public Dictionary<int, (int used, int total)> SpellSlots { get; set; } = [];
-    
 }
 
 internal class Attack
