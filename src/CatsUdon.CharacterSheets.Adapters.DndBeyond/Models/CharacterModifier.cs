@@ -1,9 +1,6 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿namespace CatsUdon.CharacterSheets.Adapters.DndBeyond.Models;
 
-namespace CatsUdon.CharacterSheets.Adapters.DndBeyond.Models;
-
-internal class Modifier
+internal class CharacterModifier
 {
     public int? FixedValue { get; set; }
     public required string Type { get; set; }

@@ -1,6 +1,6 @@
 ﻿using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
-using CatsUdon.CharacterSheets.Absctractions.CCFolia;
+using CatsUdon.CharacterSheets.CCFolia;
 using CatsUdon.CharacterSheets.Adapters.Abstractions;
 using CatsUdon.CharacterSheets.CCFolia;
 using CatsUdon.CharacterSheets.Memo;

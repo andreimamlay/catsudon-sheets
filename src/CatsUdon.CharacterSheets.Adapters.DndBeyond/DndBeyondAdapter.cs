@@ -61,15 +61,106 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
 
         var character = new Character();
         ReadBaseDetails(data.Data, character);
+        ReadAC(data.Data, character);
+        ReadWeaponAttacks(data.Data, character);
 
         return null;
     }
 
-    private void ReadBaseDetails(Data data, Character character)
+    private static void ReadWeaponAttacks(Data data, Character character)
+    {
+        var equippedWeapons = data.Inventory
+            .Where(e => e.Equipped)
+            .Where(e => e.Definition.AttackType.HasValue)
+            .Where(e => !e.Definition.CanAttune || e.IsAttuned)
+            .ToArray();
+
+        foreach (var weapon in equippedWeapons)
+        {
+            if (weapon.Definition.Damage == null) continue;
+            if (!weapon.Definition.CategoryId.HasValue) continue;
+
+            var damageDie = new Die()
+            {
+                Count = weapon.Definition.Damage.DiceCount,
+                Sides = weapon.Definition.Damage.DiceValue
+            };
+
+            var isFinesseWeapon = weapon.Definition.Properties.Any(p => p.Name == "Finesse");
+            var attackBonus = isFinesseWeapon switch
+            {
+                true => Math.Max(character.StrengthModifier, character.DexterityModifier),
+                false => character.StrengthModifier
+            };
+
+            var weaponCategory = weapon.Definition.CategoryId.Value switch
+            {
+                CategoryId.Simple => "simple-weapons",
+                CategoryId.Martial => "martial-weapons",
+                _ => ""
+            };
+            var weaponCategoryProficiency = GetProficiencyBonus(data.Modifiers, weaponCategory, character.Level);
+            var weaponProficiency = GetProficiencyBonus(data.Modifiers, weapon.Definition.Name.ToLower(), character.Level);
+
+            attackBonus += Math.Max(weaponCategoryProficiency, weaponProficiency);
+
+            character.Attacks.Add(new Attack()
+            {
+                Name = weapon.Definition.Name,
+                AttackBonus = new Modifier(attackBonus),
+                Damage = damageDie
+            });
+
+            var versatileProperty = weapon.Definition.Properties.FirstOrDefault(p => p.Name == "Versatile");
+            if (versatileProperty != null)
+            {
+                if (Die.TryParse(versatileProperty.Notes, out var versatileDamageDie))
+                {
+                    character.Attacks.Add(new Attack()
+                    {
+                        Name = weapon.Definition.Name,
+                        AttackBonus = new Modifier(attackBonus),
+                        Damage = versatileDamageDie.Value
+                    });
+                }
+            }
+        }
+    }
+
+    private static void ReadAC(Data data, Character character)
+    {
+        var equippedArmor = data.Inventory
+            .Where(e => e.Equipped)
+            .Where(e => e.Definition.ArmorTypeId.HasValue && e.Definition.ArmorTypeId != ArmorType.Shield)
+            .Where(e => !e.Definition.CanAttune || e.IsAttuned)
+            .FirstOrDefault();
+
+        var equippedShield = data.Inventory
+            .Where(e => e.Equipped)
+            .Where(e => e.Definition.ArmorTypeId == ArmorType.Shield)
+            .Where(e => !e.Definition.CanAttune || e.IsAttuned)
+            .FirstOrDefault();
+
+        var hasUnarmoredDefense = data.Modifiers.Class.Any(m => m.Type == Types.Set && m.SubType == "unarmored-armor-class");
+        if (hasUnarmoredDefense && equippedArmor == null)
+        {
+            character.ArmorClass = 10 + character.DexterityModifier + character.ConstitutionModifier;
+        }
+        else
+        {
+            var armorClass = equippedArmor?.Definition.ArmorClass ?? 10;
+            if (equippedArmor?.Definition.ArmorTypeId != ArmorType.Heavy) armorClass += Math.Min(character.DexterityModifier, 2);
+            if (equippedShield != null) armorClass += equippedShield.Definition.ArmorClass ?? 0;
+
+            character.ArmorClass = armorClass;
+        }
+    }
+
+    private static void ReadBaseDetails(Data data, Character character)
     {
         character.Name = data.Name;
         character.Level = data.Classes.Sum(c => c.Level);
-        character.HitDice = [.. data.Classes.Select(c => new Absctractions.Die() { Count = c.Level, Sides = c.Definition.HitDice })];
+        character.HitDice = [.. data.Classes.Select(c => new Die() { Count = c.Level, Sides = c.Definition.HitDice })];
 
         character.StrengthScore = SumAbilityScores(StatIds.Strength, data);
         character.DexterityScore = SumAbilityScores(StatIds.Dexterity, data);
@@ -186,6 +277,6 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
         };
     }
 
-    private static int SumModifiers(Modifier[] modifiers, string type, string subType) => modifiers.Where(m => m.Type == type && m.SubType == subType).Sum(m => m.FixedValue ?? 0);
+    private static int SumModifiers(CharacterModifier[] modifiers, string type, string subType) => modifiers.Where(m => m.Type == type && m.SubType == subType).Sum(m => m.FixedValue ?? 0);
     private static int ScoreToModifier(int score) => (int)Math.Floor((score - 10) / 2f);
 }

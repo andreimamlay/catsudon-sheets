@@ -1,4 +1,4 @@
-﻿namespace CatsUdon.CharacterSheets.Absctractions.CCFolia;
+﻿namespace CatsUdon.CharacterSheets.CCFolia;
 
 public class CCFoliaCharacterClipboardData
 {

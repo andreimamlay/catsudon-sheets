@@ -1,4 +1,4 @@
-﻿using CatsUdon.CharacterSheets.Absctractions;
+﻿using CatsUdon.CharacterSheets;
 
 namespace CatsUdon.CharacterSheets.Adapters.DndBeyond;
 
@@ -54,6 +54,7 @@ internal class Character
     public int WisdomSavingThrowModifier { get; set; }
     public int CharismaSavingThrowModifier { get; set; }
 
+    public List<Attack> Attacks { get; set; } = [];
 }
 
 internal enum Abilities
@@ -64,4 +65,11 @@ internal enum Abilities
     Intelligence = 4,
     Wisdom = 5,
     Charisma = 6
+}
+
+internal class Attack
+{
+    public required string Name { get; set; }
+    public Modifier? AttackBonus { get; set; }
+    public Die Damage { get; set; }
 }

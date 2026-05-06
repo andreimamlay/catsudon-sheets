@@ -1,6 +1,4 @@
-﻿using CatsUdon.CharacterSheets.CCFolia;
-
-namespace CatsUdon.CharacterSheets.Absctractions.CCFolia;
+﻿namespace CatsUdon.CharacterSheets.CCFolia;
 
 public class CCFoliaCharacter
 {

@@ -1,15 +1,20 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
-namespace CatsUdon.CharacterSheets.Absctractions;
+namespace CatsUdon.CharacterSheets;
 public readonly partial struct Die
 {
     [GeneratedRegex(@"^(?<count>\d+)d(?<sides>\d+)(?<modifier>(\+|-)\d+)?$")]
     private static partial Regex DieRegex { get; }
 
-    public static bool TryParse(string input, [NotNullWhen(true)] out Die? die)
+    public static bool TryParse(string? input, [NotNullWhen(true)] out Die? die)
     {
         die = default;
+
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return false;
+        }
 
         var match = DieRegex.Match(input);
         if (!match.Success)

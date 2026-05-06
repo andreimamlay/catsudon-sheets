@@ -1,4 +1,4 @@
-﻿using CatsUdon.CharacterSheets.Absctractions;
+﻿using CatsUdon.CharacterSheets;
 
 namespace CatsUdon.CharacterSheets.Adapters.DndJp;
 

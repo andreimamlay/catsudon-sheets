@@ -1,7 +1,7 @@
 ﻿using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
-using CatsUdon.CharacterSheets.Absctractions;
-using CatsUdon.CharacterSheets.Absctractions.CCFolia;
+using CatsUdon.CharacterSheets;
+using CatsUdon.CharacterSheets.CCFolia;
 using CatsUdon.CharacterSheets.Adapters.Abstractions;
 using CatsUdon.CharacterSheets.CCFolia;
 using System.Text;
