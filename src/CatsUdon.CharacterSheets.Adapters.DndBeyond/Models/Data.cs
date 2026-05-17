@@ -13,4 +13,5 @@ internal class Data
     public required ModifiersTable Modifiers { get; set; }
     public required Class[] Classes { get; set; }
     public required Equipment[] Inventory { get; set; }
+    public required ClassSpells[] ClassSpells { get; set; }
 }

@@ -5,6 +5,7 @@ internal class CharacterModifier
     public int? FixedValue { get; set; }
     public required string Type { get; set; }
     public required string SubType { get; set; }
+    public int ComponentId { get; set; }
 }
 
 public enum ModifierType

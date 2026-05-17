@@ -1,4 +1,4 @@
-﻿using CatsUdon.CharacterSheets;
+﻿using System.Diagnostics;
 
 namespace CatsUdon.CharacterSheets.Adapters.DndBeyond;
 
@@ -6,6 +6,7 @@ internal class Character
 {
     public string Name { get; set; } = string.Empty;
     public int Level { get; set; }
+    public int ProficiencyBonus { get; set; }
     public Die[] HitDice { get; set; } = [];
 
     public int CurrentHp { get; set; }
@@ -55,21 +56,33 @@ internal class Character
     public int CharismaSavingThrowModifier { get; set; }
 
     public List<Attack> Attacks { get; set; } = [];
+    public List<SpellEffect> SpellEffects { get; set; } = [];
+    public List<SpellSlot> SpellSlots { get; set; } = [];
+    public List<SpellSlot> PactMagic { get; set; } = [];
 }
 
-internal enum Abilities
-{
-    Strength = 1,
-    Dexterity = 2,
-    Constitution = 3,
-    Intelligence = 4,
-    Wisdom = 5,
-    Charisma = 6
-}
-
+[DebuggerDisplay("{Name} {AttackBonus} vs AC, {Damage} damage")]
 internal class Attack
 {
     public required string Name { get; set; }
-    public Modifier? AttackBonus { get; set; }
+    public int? Level { get; set; }
+    public Modifier AttackBonus { get; set; }
     public Die Damage { get; set; }
+}
+
+[DebuggerDisplay("{Name} (DC {SpellSaveDc} {SpellSaveAbilityId}), {Damage} damage")]
+internal class SpellEffect
+{
+    public required string Name { get; set; }
+    public int Level { get; set; }
+    public Die Damage { get; set; }
+    public StatIds? SpellSaveAbilityId { get; set; }
+    public int? SpellSaveDc { get; set; }
+}
+
+internal class SpellSlot
+{
+    public int Level { get; set; }
+    public int Used { get; set; }
+    public int Available { get; set; }
 }

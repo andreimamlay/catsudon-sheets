@@ -11,21 +11,21 @@ internal class EquipmentDefinition
     public required string Type { get; set; }
     public bool CanAttune { get; set; }
     public int? ArmorClass { get; set; }
-    public StealthCheck? StealthCheck { get; set; }
-    public ArmorType? ArmorTypeId { get; set; }
+    public StealthCheckTypes? StealthCheck { get; set; }
+    public ArmorTypes? ArmorTypeId { get; set; }
     public AttackType? AttackType { get; set; }
-    public CategoryId? CategoryId { get; set; }
+    public WeaponCategories? CategoryId { get; set; }
     public Dice? Damage { get; set; }
     public required EquipmentProperty[] Properties { get; set; }
 }
 
-internal enum StealthCheck
+internal enum StealthCheckTypes
 {
-    NoDisadvantage = 1,
+    None = 1,
     Disadvantage = 2
 }
 
-internal enum ArmorType
+internal enum ArmorTypes
 {
     Light = 1,
     Medium = 2,
@@ -35,14 +35,13 @@ internal enum ArmorType
 
 internal enum AttackType
 {
-    MeleeWeapon = 1,
-    RangedWeapon = 2,
-    MeleeSpellAttack = 3,
-    RangedSpellAttack = 4
+    Melee = 1,
+    Ranged = 2
 }
 
-internal enum CategoryId
+internal enum WeaponCategories
 {
     Simple = 1,
-    Martial = 2
+    Martial = 2,
+    Firearms = 3
 }

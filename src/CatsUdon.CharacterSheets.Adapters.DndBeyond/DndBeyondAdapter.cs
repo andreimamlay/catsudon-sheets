@@ -61,11 +61,238 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
 
         var character = new Character();
         ReadBaseDetails(data.Data, character);
-        ReadAC(data.Data, character);
+        ReadAc(data.Data, character);
         ReadWeaponAttacks(data.Data, character);
+        ReadSpellSlots(data.Data, character);
+        ReadSpellEffects(data.Data, character);
 
         return null;
     }
+
+    private void ReadSpellEffects(Data data, Character character)
+    {
+        var maxSlotLevel = GetMaxSpellSlotLevel(character);
+        foreach (var classSpells in data.ClassSpells)
+        {
+            var characterClass = data.Classes.FirstOrDefault(c => c.Id == classSpells.CharacterClassId);
+            if (characterClass == null) continue;
+
+            var spellcastingModifier = characterClass.Definition.SpellCastingAbilityId switch
+            {
+                StatIds.Strength => character.StrengthModifier,
+                StatIds.Dexterity => character.DexterityModifier,
+                StatIds.Constitution => character.ConstitutionModifier,
+                StatIds.Intelligence => character.IntelligenceModifier,
+                StatIds.Wisdom => character.WisdomModifier,
+                StatIds.Charisma => character.CharismaModifier,
+                _ => 0
+            };
+
+            foreach (var spell in classSpells.Spells)
+            {
+                var damageModifier = spell.Definition.Modifiers.FirstOrDefault(m => m.Type == "damage");
+                if (damageModifier == null) continue;
+
+                if (damageModifier.AtHigherLevels.HigherLevelDefinitions.Length == 1)
+                {
+                    // Upcastable spell with scaling
+                    for (int i = spell.Definition.Level; i < maxSlotLevel; i++)
+                    {
+                        if (spell.Definition.RequiresSavingThrow)
+                        {
+                            var spellEffect = new SpellEffect()
+                            {
+                                Name = spell.Definition.Name,
+                                SpellSaveAbilityId = spell.Definition.SaveDcAbilityId,
+                                SpellSaveDc = GetSpellSaveDc(spellcastingModifier, character),
+                                Damage = GetUpcastDamageDie(damageModifier, spell.Definition.Level, i),
+                                Level = i
+                            };
+
+                            character.SpellEffects.Add(spellEffect);
+                        }
+                        else
+                        {
+                            character.Attacks.Add(new Attack()
+                            {
+                                Name = spell.Definition.Name,
+                                AttackBonus = character.ProficiencyBonus + spellcastingModifier,
+                                Damage = GetUpcastDamageDie(damageModifier, spell.Definition.Level, i),
+                                Level = i
+                            });
+                        }
+                    }
+                }
+                else
+                {
+                    if (spell.Definition.RequiresSavingThrow)
+                    {
+                        var spellEffect = new SpellEffect()
+                        {
+                            Name = spell.Definition.Name,
+                            SpellSaveAbilityId = spell.Definition.SaveDcAbilityId,
+                            SpellSaveDc = GetSpellSaveDc(spellcastingModifier, character),
+                            Damage = GetDamageDie(damageModifier, character)
+                        };
+
+                        character.SpellEffects.Add(spellEffect);
+                    }
+                    else
+                    {
+                        character.Attacks.Add(new Attack()
+                        {
+                            Name = spell.Definition.Name,
+                            AttackBonus = character.ProficiencyBonus + spellcastingModifier,
+                            Damage = GetDamageDie(damageModifier, character),
+                        });
+                    }
+                }
+            }
+        }
+
+        static int GetMaxSpellSlotLevel(Character character)
+        {
+            var maxSpellSlotLevel = 0;
+            var maxPactMagicSlotLevel = 0;
+
+            if (character.SpellSlots.Count > 0) maxSpellSlotLevel = character.SpellSlots.Max(s => s.Level);
+            if (character.PactMagic.Count > 0) maxPactMagicSlotLevel = character.PactMagic.Max(s => s.Level);
+
+            return Math.Max(maxSpellSlotLevel, maxPactMagicSlotLevel);
+        }
+    }
+
+    private static Die GetUpcastDamageDie(SpellModifier damageModifier, int baseSlot, int currentSlot)
+    {
+        if (damageModifier.AtHigherLevels.HigherLevelDefinitions.Length != 1) throw new InvalidOperationException("Not an upcastable spell effect");
+
+        var damageDie = Die.Zero;
+        if (damageModifier.Die.DiceValue.HasValue && damageModifier.Die.DiceCount.HasValue)
+        {
+            damageDie = new Die() 
+            { 
+                Count = damageModifier.Die.DiceCount.Value, 
+                Sides = damageModifier.Die.DiceValue.Value,
+                Modifier = damageModifier.Die.FixedValue ?? 0
+            };
+        }
+
+        var bonusDamagePerSlotLevel = damageModifier.AtHigherLevels.HigherLevelDefinitions[0].Dice;
+        if (currentSlot > baseSlot && bonusDamagePerSlotLevel != null && bonusDamagePerSlotLevel.DiceCount.HasValue && bonusDamagePerSlotLevel.DiceValue.HasValue)
+        {
+            var levelDifference = currentSlot - baseSlot;
+            damageDie = damageDie with
+            {
+                Count = damageDie.Count + (bonusDamagePerSlotLevel.DiceCount.Value * levelDifference),
+            };
+        }
+
+        return damageDie;
+    }
+
+    private static Die GetDamageDie(SpellModifier damageModifier, Character character)
+    {
+        var higherLevelDefinition = damageModifier.AtHigherLevels.HigherLevelDefinitions
+            .Where(d => d.Level <= character.Level)
+            .OrderByDescending(d => d.Level)
+            .FirstOrDefault();
+
+        if (higherLevelDefinition != null && higherLevelDefinition.Dice != null && higherLevelDefinition.Dice.DiceValue.HasValue && higherLevelDefinition.Dice.DiceCount.HasValue)
+        {
+            return new Die() 
+            { 
+                Count = higherLevelDefinition.Dice.DiceCount.Value, 
+                Sides = higherLevelDefinition.Dice.DiceValue.Value,
+                Modifier = higherLevelDefinition.Dice.FixedValue ?? 0
+            };
+        }
+
+        if (damageModifier.Die.DiceValue.HasValue && damageModifier.Die.DiceCount.HasValue)
+        {
+            return new Die() 
+            { 
+                Count = damageModifier.Die.DiceCount.Value, 
+                Sides = damageModifier.Die.DiceValue.Value,
+                Modifier = damageModifier.Die.FixedValue ?? 0
+            };
+        }
+
+        return Die.Zero;
+    }
+
+    private static int GetSpellSaveDc(int spellcastingModifier, Character character) => 8 + spellcastingModifier + character.ProficiencyBonus;
+
+    private void ReadSpellSlots(Data data, Character character)
+    {
+        var spellcasterLevel = 0f;
+        foreach (var characterClass in data.Classes)
+        {
+            if (!characterClass.Definition.SpellCastingAbilityId.HasValue) continue;
+            if (characterClass.Definition.Name == "Warlock") continue;
+
+            var thisClassLevel = (float)characterClass.Level / characterClass.Definition.SpellRules.MultiClassSpellSlotDivisor;
+            spellcasterLevel += characterClass.Definition.SpellRules.MultiClassSpellSlotRounding switch
+            {
+                MultiClassSpellSlotRounding.RoundDown => (float)Math.Floor(thisClassLevel),
+                MultiClassSpellSlotRounding.RoundUp => (float)Math.Ceiling(thisClassLevel),
+                _ => 0
+            };
+        }
+
+        var slotsAtLevel = SlotsAtLevel.ElementAtOrDefault((int)spellcasterLevel);
+        if (slotsAtLevel != null)
+        {
+            for (int i = 0; i < slotsAtLevel.Length; i++)
+            {
+                character.SpellSlots.Add(new SpellSlot()
+                {
+                    Level = i + 1,
+                    Used = 0,
+                    Available = slotsAtLevel[i]
+                });
+            }
+        }
+
+        var warlockClass = data.Classes.FirstOrDefault(c => c.Definition.Name == "Warlock");
+        var warlockSlotsAtLevel = warlockClass?.Definition.SpellRules.LevelSpellSlots.ElementAtOrDefault(warlockClass.Level) ?? [];
+        for (int i = 0; i < warlockSlotsAtLevel.Length; i++)
+        {
+            var level = i + 1;
+            var slotsCount = warlockSlotsAtLevel[i];
+            if (slotsCount == 0) continue;
+
+            character.PactMagic.Add(new SpellSlot()
+            {
+                Level = level,
+                Available = slotsCount,
+                Used = 0
+            });
+        }
+    }
+
+    private static readonly int[][] SlotsAtLevel = [
+        [],
+        [2],
+        [3],
+        [4, 2],
+        [4, 3],
+        [4, 3, 2],
+        [4, 3, 3],
+        [4, 3, 3, 1],
+        [4, 3, 3, 2],
+        [4, 3, 3, 3, 1],
+        [4, 3, 3, 3, 2],
+        [4, 3, 3, 3, 2, 1],
+        [4, 3, 3, 3, 2, 1],
+        [4, 3, 3, 3, 2, 1, 1],
+        [4, 3, 3, 3, 2, 1, 1],
+        [4, 3, 3, 3, 2, 1, 1, 1],
+        [4, 3, 3, 3, 2, 1, 1, 1],
+        [4, 3, 3, 3, 2, 1, 1, 1, 1],
+        [4, 3, 3, 3, 3, 1, 1, 1, 1],
+        [4, 3, 3, 3, 3, 2, 1, 1, 1],
+        [4, 3, 3, 3, 3, 2, 2, 1, 1]
+    ];
 
     private static void ReadWeaponAttacks(Data data, Character character)
     {
@@ -78,12 +305,14 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
         foreach (var weapon in equippedWeapons)
         {
             if (weapon.Definition.Damage == null) continue;
+            if (!weapon.Definition.Damage.DiceCount.HasValue) continue; 
+            if (!weapon.Definition.Damage.DiceValue.HasValue) continue;
             if (!weapon.Definition.CategoryId.HasValue) continue;
 
             var damageDie = new Die()
             {
-                Count = weapon.Definition.Damage.DiceCount,
-                Sides = weapon.Definition.Damage.DiceValue
+                Count = weapon.Definition.Damage.DiceCount.Value,
+                Sides = weapon.Definition.Damage.DiceValue.Value
             };
 
             var isFinesseWeapon = weapon.Definition.Properties.Any(p => p.Name == "Finesse");
@@ -95,12 +324,12 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
 
             var weaponCategory = weapon.Definition.CategoryId.Value switch
             {
-                CategoryId.Simple => "simple-weapons",
-                CategoryId.Martial => "martial-weapons",
+                WeaponCategories.Simple => "simple-weapons",
+                WeaponCategories.Martial => "martial-weapons",
                 _ => ""
             };
-            var weaponCategoryProficiency = GetProficiencyBonus(data.Modifiers, weaponCategory, character.Level);
-            var weaponProficiency = GetProficiencyBonus(data.Modifiers, weapon.Definition.Name.ToLower(), character.Level);
+            var weaponCategoryProficiency = GetProficiencyBonus(data.Modifiers, weaponCategory, character);
+            var weaponProficiency = GetProficiencyBonus(data.Modifiers, weapon.Definition.Name.ToLower(), character);
 
             attackBonus += Math.Max(weaponCategoryProficiency, weaponProficiency);
 
@@ -127,17 +356,17 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
         }
     }
 
-    private static void ReadAC(Data data, Character character)
+    private static void ReadAc(Data data, Character character)
     {
         var equippedArmor = data.Inventory
             .Where(e => e.Equipped)
-            .Where(e => e.Definition.ArmorTypeId.HasValue && e.Definition.ArmorTypeId != ArmorType.Shield)
+            .Where(e => e.Definition.ArmorTypeId.HasValue && e.Definition.ArmorTypeId != ArmorTypes.Shield)
             .Where(e => !e.Definition.CanAttune || e.IsAttuned)
             .FirstOrDefault();
 
         var equippedShield = data.Inventory
             .Where(e => e.Equipped)
-            .Where(e => e.Definition.ArmorTypeId == ArmorType.Shield)
+            .Where(e => e.Definition.ArmorTypeId == ArmorTypes.Shield)
             .Where(e => !e.Definition.CanAttune || e.IsAttuned)
             .FirstOrDefault();
 
@@ -149,7 +378,7 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
         else
         {
             var armorClass = equippedArmor?.Definition.ArmorClass ?? 10;
-            if (equippedArmor?.Definition.ArmorTypeId != ArmorType.Heavy) armorClass += Math.Min(character.DexterityModifier, 2);
+            if (equippedArmor?.Definition.ArmorTypeId != ArmorTypes.Heavy) armorClass += Math.Min(character.DexterityModifier, 2);
             if (equippedShield != null) armorClass += equippedShield.Definition.ArmorClass ?? 0;
 
             character.ArmorClass = armorClass;
@@ -161,6 +390,7 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
         character.Name = data.Name;
         character.Level = data.Classes.Sum(c => c.Level);
         character.HitDice = [.. data.Classes.Select(c => new Die() { Count = c.Level, Sides = c.Definition.HitDice })];
+        character.ProficiencyBonus = 1 + (int)Math.Ceiling(character.Level / 4f);
 
         character.StrengthScore = SumAbilityScores(StatIds.Strength, data);
         character.DexterityScore = SumAbilityScores(StatIds.Dexterity, data);
@@ -176,31 +406,31 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
         character.WisdomModifier = ScoreToModifier(character.WisdomScore);
         character.CharismaModifier = ScoreToModifier(character.CharismaScore);
 
-        character.StrengthSavingThrowModifier = character.StrengthModifier + GetProficiencyBonus(data.Modifiers, "strength-saving-throws", character.Level);
-        character.DexteritySavingThrowModifier = character.DexterityModifier + GetProficiencyBonus(data.Modifiers, "dexterity-saving-throws", character.Level);
-        character.ConstitutionSavingThrowModifier = character.ConstitutionModifier + GetProficiencyBonus(data.Modifiers, "constitution-saving-throws", character.Level);
-        character.IntelligenceSavingThrowModifier = character.IntelligenceModifier + GetProficiencyBonus(data.Modifiers, "intelligence-saving-throws", character.Level);
-        character.WisdomSavingThrowModifier = character.WisdomModifier + GetProficiencyBonus(data.Modifiers, "wisdom-saving-throws", character.Level);
-        character.CharismaSavingThrowModifier = character.CharismaModifier + GetProficiencyBonus(data.Modifiers, "charisma-saving-throws", character.Level);
+        character.StrengthSavingThrowModifier = character.StrengthModifier + GetProficiencyBonus(data.Modifiers, "strength-saving-throws", character);
+        character.DexteritySavingThrowModifier = character.DexterityModifier + GetProficiencyBonus(data.Modifiers, "dexterity-saving-throws", character);
+        character.ConstitutionSavingThrowModifier = character.ConstitutionModifier + GetProficiencyBonus(data.Modifiers, "constitution-saving-throws", character);
+        character.IntelligenceSavingThrowModifier = character.IntelligenceModifier + GetProficiencyBonus(data.Modifiers, "intelligence-saving-throws", character);
+        character.WisdomSavingThrowModifier = character.WisdomModifier + GetProficiencyBonus(data.Modifiers, "wisdom-saving-throws", character);
+        character.CharismaSavingThrowModifier = character.CharismaModifier + GetProficiencyBonus(data.Modifiers, "charisma-saving-throws", character);
 
-        character.AcrobaticsModifier = character.DexterityModifier + GetProficiencyBonus(data.Modifiers, "acrobatics", character.Level);
-        character.AnimalHandlingModifier = character.WisdomModifier + GetProficiencyBonus(data.Modifiers, "animal-handling", character.Level);
-        character.ArcanaModifier = character.IntelligenceModifier + GetProficiencyBonus(data.Modifiers, "arcana", character.Level);
-        character.AthleticsModifier = character.StrengthModifier + GetProficiencyBonus(data.Modifiers, "athletics", character.Level);
-        character.DeceptionModifier = character.CharismaModifier + GetProficiencyBonus(data.Modifiers, "deception", character.Level);
-        character.HistoryModifier = character.IntelligenceModifier + GetProficiencyBonus(data.Modifiers, "history", character.Level);
-        character.InsightModifier = character.WisdomModifier + GetProficiencyBonus(data.Modifiers, "insight", character.Level);
-        character.IntimidationModifier = character.CharismaModifier + GetProficiencyBonus(data.Modifiers, "intimidation", character.Level);
-        character.InvestigationModifier = character.IntelligenceModifier + GetProficiencyBonus(data.Modifiers, "investigation", character.Level);
-        character.MedicineModifier = character.WisdomModifier + GetProficiencyBonus(data.Modifiers, "medicine", character.Level);
-        character.NatureModifier = character.IntelligenceModifier + GetProficiencyBonus(data.Modifiers, "nature", character.Level);
-        character.PerceptionModifier = character.WisdomModifier + GetProficiencyBonus(data.Modifiers, "perception", character.Level);
-        character.PerformanceModifier = character.CharismaModifier + GetProficiencyBonus(data.Modifiers, "performance", character.Level);
-        character.PersuasionModifier = character.CharismaModifier + GetProficiencyBonus(data.Modifiers, "persuasion", character.Level);
-        character.ReligionModifier = character.IntelligenceModifier + GetProficiencyBonus(data.Modifiers, "religion", character.Level);
-        character.SleightOfHandModifier = character.DexterityModifier + GetProficiencyBonus(data.Modifiers, "sleight-of-hand", character.Level);
-        character.StealthModifier = character.DexterityModifier + GetProficiencyBonus(data.Modifiers, "stealth", character.Level);
-        character.SurvivalModifier = character.WisdomModifier + GetProficiencyBonus(data.Modifiers, "survival", character.Level);
+        character.AcrobaticsModifier = character.DexterityModifier + GetProficiencyBonus(data.Modifiers, "acrobatics", character);
+        character.AnimalHandlingModifier = character.WisdomModifier + GetProficiencyBonus(data.Modifiers, "animal-handling", character);
+        character.ArcanaModifier = character.IntelligenceModifier + GetProficiencyBonus(data.Modifiers, "arcana", character);
+        character.AthleticsModifier = character.StrengthModifier + GetProficiencyBonus(data.Modifiers, "athletics", character);
+        character.DeceptionModifier = character.CharismaModifier + GetProficiencyBonus(data.Modifiers, "deception", character);
+        character.HistoryModifier = character.IntelligenceModifier + GetProficiencyBonus(data.Modifiers, "history", character);
+        character.InsightModifier = character.WisdomModifier + GetProficiencyBonus(data.Modifiers, "insight", character);
+        character.IntimidationModifier = character.CharismaModifier + GetProficiencyBonus(data.Modifiers, "intimidation", character);
+        character.InvestigationModifier = character.IntelligenceModifier + GetProficiencyBonus(data.Modifiers, "investigation", character);
+        character.MedicineModifier = character.WisdomModifier + GetProficiencyBonus(data.Modifiers, "medicine", character);
+        character.NatureModifier = character.IntelligenceModifier + GetProficiencyBonus(data.Modifiers, "nature", character);
+        character.PerceptionModifier = character.WisdomModifier + GetProficiencyBonus(data.Modifiers, "perception", character);
+        character.PerformanceModifier = character.CharismaModifier + GetProficiencyBonus(data.Modifiers, "performance", character);
+        character.PersuasionModifier = character.CharismaModifier + GetProficiencyBonus(data.Modifiers, "persuasion", character);
+        character.ReligionModifier = character.IntelligenceModifier + GetProficiencyBonus(data.Modifiers, "religion", character);
+        character.SleightOfHandModifier = character.DexterityModifier + GetProficiencyBonus(data.Modifiers, "sleight-of-hand", character);
+        character.StealthModifier = character.DexterityModifier + GetProficiencyBonus(data.Modifiers, "stealth", character);
+        character.SurvivalModifier = character.WisdomModifier + GetProficiencyBonus(data.Modifiers, "survival", character);
 
         character.PassivePerception = 10 + character.PerceptionModifier;
         character.MaxHp = CalculateMaxHp(data, character);
@@ -213,13 +443,13 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
         var classes = data.Classes;
         var totalHp = 0;
 
-        foreach (var cls in classes)
+        foreach (var characterClass in classes)
         {
-            int level = cls.Level;
-            int hitDie = cls.Definition.HitDice;
+            int level = characterClass.Level;
+            int hitDie = characterClass.Definition.HitDice;
             int fixedPerLevel = (hitDie / 2) + 1;
 
-            if (cls.IsStartingClass)
+            if (characterClass.IsStartingClass)
             {
                 // lvl1
                 totalHp += hitDie + character.ConstitutionModifier;
@@ -231,12 +461,28 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
             {
                 totalHp += level * (fixedPerLevel + character.ConstitutionModifier);
             }
+
+            var activeClassFeatures = characterClass.ClassFeatures.Where(f => f.Definition.RequiredLevel <= level).Select(f => f.Definition.Id).ToArray();
+            foreach (var modifier in data.Modifiers.Class)
+            {
+                if (!activeClassFeatures.Contains(modifier.ComponentId)) continue;
+                if (modifier.Type != Types.Bonus || modifier.SubType != "hit-points-per-level") continue;
+
+                totalHp += (modifier.FixedValue ?? 0) * level;
+            }
+        }
+
+        // Racial modifiers are always active
+        var raceModifiers = data.Modifiers.Race.Where(m => m.Type == Types.Bonus && m.SubType == "hit-points-per-level");
+        foreach (var modifier in raceModifiers)
+        {
+            totalHp += (modifier.FixedValue ?? 0) * character.Level;
         }
 
         return totalHp;
     }
 
-    private static int GetProficiencyBonus(ModifiersTable modifiers, string subType, int characterLevel)
+    private static int GetProficiencyBonus(ModifiersTable modifiers, string subType, Character character)
     {
         var isProficient = modifiers.Race.Any(m => m.Type == Types.Proficiency && m.SubType == subType)
             || modifiers.Class.Any(m => m.Type == Types.Proficiency && m.SubType == subType)
@@ -246,7 +492,7 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
 
         if (!isProficient) return 0;
 
-        return 1 + (int)Math.Ceiling(characterLevel / 4f);
+        return character.ProficiencyBonus;
     }
 
     private static int SumAbilityScores(StatIds statId, Data data)

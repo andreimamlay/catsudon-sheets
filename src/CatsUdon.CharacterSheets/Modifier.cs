@@ -1,5 +1,8 @@
-﻿namespace CatsUdon.CharacterSheets;
+﻿using System.Diagnostics;
 
+namespace CatsUdon.CharacterSheets;
+
+[DebuggerDisplay("{ToString()}")]
 public readonly struct Modifier(int value)
 {
     public int Value { get; } = value;

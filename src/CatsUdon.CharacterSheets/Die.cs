@@ -1,11 +1,16 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 namespace CatsUdon.CharacterSheets;
+
+[DebuggerDisplay("{Count}d{Sides}{Modifier}")]
 public readonly partial struct Die
 {
     [GeneratedRegex(@"^(?<count>\d+)d(?<sides>\d+)(?<modifier>(\+|-)\d+)?$")]
     private static partial Regex DieRegex { get; }
+
+    public static readonly Die Zero = new();
 
     public static bool TryParse(string? input, [NotNullWhen(true)] out Die? die)
     {
