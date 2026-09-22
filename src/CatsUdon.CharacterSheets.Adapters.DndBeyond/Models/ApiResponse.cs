@@ -1,9 +1,7 @@
-﻿using System.Text.Json.Serialization;
+﻿namespace CatsUdon.CharacterSheets.Adapters.DndBeyond.Models;
 
-namespace CatsUdon.CharacterSheets.Adapters.DndBeyond.Models;
-
-internal class ApiResponse
+internal class ApiResponse<TData>
 {
     public bool Success { get; set; }
-    public Data? Data { get; set; }
+    public TData? Data { get; set; }
 }

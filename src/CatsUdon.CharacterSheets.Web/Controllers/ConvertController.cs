@@ -1,5 +1,5 @@
-﻿using CatsUdon.CharacterSheets.CCFolia;
-using CatsUdon.CharacterSheets.Adapters.Abstractions;
+﻿using CatsUdon.CharacterSheets.Adapters.Abstractions;
+using CatsUdon.CharacterSheets.CCFolia;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatsUdon.CharacterSheets.Web.Controllers;

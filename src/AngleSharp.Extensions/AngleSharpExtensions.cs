@@ -1,6 +1,7 @@
 ﻿using AngleSharp.Dom;
 
 namespace AngleSharp.Html.Dom;
+
 public static class AngleSharpExtensions
 {
     public static string QuerySelectorText(this IHtmlDocument document, string selector)

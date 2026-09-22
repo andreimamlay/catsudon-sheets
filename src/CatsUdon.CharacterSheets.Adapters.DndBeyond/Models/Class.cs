@@ -6,5 +6,6 @@ internal class Class
     public required int Level { get; set; }
     public bool IsStartingClass { get; set; }
     public required ClassDefinition Definition { get; set; }
+    public SubclassDefinition? SubclassDefinition { get; set; }
     public required ClassFeature[] ClassFeatures { get; set; }
 }

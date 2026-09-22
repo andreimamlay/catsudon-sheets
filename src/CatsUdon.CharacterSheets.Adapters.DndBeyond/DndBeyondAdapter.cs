@@ -1,18 +1,16 @@
 ﻿using CatsUdon.CharacterSheets.Adapters.Abstractions;
 using CatsUdon.CharacterSheets.Adapters.DndBeyond.Models;
-using System.Text.Json;
+using CatsUdon.CharacterSheets.CCFolia;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace CatsUdon.CharacterSheets.Adapters.DndBeyond;
 
-internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheetAdapter
+internal partial class DndBeyondAdapter(IDndBeyondApiClient apiClient) : ICharacterSheetAdapter
 {
-    private static readonly JsonSerializerOptions jsonSerializerOptions = new(JsonSerializerDefaults.Web);
-
     [GeneratedRegex(@"^https:\/\/www\.dndbeyond\.com\/characters\/(?<characterId>\d+)$")]
     private static partial Regex UrlMatchRegex { get; }
 
-    private const string CharacterApiUrlTemplate = "https://character-service.dndbeyond.com/character/v5/character/{0}?includeCustomItems=true";
 
     private static readonly Lazy<GameSystemInfo[]> supportedSystems = new([
         new GameSystemInfo()
@@ -47,31 +45,184 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
         var match = UrlMatchRegex.Match(url);
         var characterId = match.Groups["characterId"].Value;
 
-        //var getCharacterJsonResponse = await httpClient.GetAsync(string.Format(CharacterApiUrlTemplate, characterId));
-        //getCharacterJsonResponse.EnsureSuccessStatusCode();
-
-        //var response = await getCharacterJsonResponse.Content.ReadAsStringAsync();
-
-        var sample = await File.ReadAllTextAsync("../CatsUdon.CharacterSheets.Adapters.DndBeyond/sample.json");
-        var data = JsonSerializer.Deserialize<ApiResponse>(sample, jsonSerializerOptions);
-        if (data == null || !data.Success || data.Data == null)
-        {
-            throw new InvalidOperationException("Failed to retrieve character data");
-        }
+        var characterData = await apiClient.GetCharacterAsync(characterId);
 
         var character = new Character();
-        ReadBaseDetails(data.Data, character);
-        ReadAc(data.Data, character);
-        ReadWeaponAttacks(data.Data, character);
-        ReadSpellSlots(data.Data, character);
-        ReadSpellEffects(data.Data, character);
+        ReadBaseDetails(characterData, character);
+        ReadAc(characterData, character);
+        ReadWeaponAttacks(characterData, character);
+        ReadActions(characterData, character);
+        ReadSpellSlots(characterData, character);
+        await ReadSpellEffects(characterData, character);
 
-        return null;
+        return new CharacterSheet()
+        {
+            Character = ConvertToCCFoliaCharacter(character)
+        };
     }
 
-    private void ReadSpellEffects(Data data, Character character)
+    private static CCFoliaCharacterClipboardData ConvertToCCFoliaCharacter(Character character)
+    {
+        var ccfoliaCharacter = new CCFoliaCharacterClipboardData();
+        var data = ccfoliaCharacter.Data;
+        data.Name = character.Name;
+        data.Initiative = 0;
+
+        data.Status.Add(new CCFoliaStatus() { Label = "HP", Value = character.CurrentHp, Max = character.MaxHp });
+        data.Status.Add(new CCFoliaStatus() { Label = "Temp HP", Value = character.TemporaryHp });
+        data.Status.Add(new CCFoliaStatus() { Label = "AC", Value = character.ArmorClass });
+        data.Status.Add(new CCFoliaStatus() { Label = "Inspiration", Value = character.Inspiration });
+
+        foreach (var spellSlot in character.SpellSlots)
+        {
+            data.Status.Add(new CCFoliaStatus()
+            {
+                Label = $"Slot {spellSlot.Level}",
+                Value = spellSlot.Available,
+                Max = spellSlot.Available
+            });
+        }
+
+        foreach (var pactSlot in character.PactMagic)
+        {
+            data.Status.Add(new CCFoliaStatus()
+            {
+                Label = $"Pact {pactSlot.Level}",
+                Value = pactSlot.Available,
+                Max = pactSlot.Available
+            });
+        }
+
+        data.Params.Add(new CCFoliaParameter() { Label = "STR", Value = ToModifierString(character.StrengthModifier) });
+        data.Params.Add(new CCFoliaParameter() { Label = "DEX", Value = ToModifierString(character.DexterityModifier) });
+        data.Params.Add(new CCFoliaParameter() { Label = "CON", Value = ToModifierString(character.ConstitutionModifier) });
+        data.Params.Add(new CCFoliaParameter() { Label = "INT", Value = ToModifierString(character.IntelligenceModifier) });
+        data.Params.Add(new CCFoliaParameter() { Label = "WIS", Value = ToModifierString(character.WisdomModifier) });
+        data.Params.Add(new CCFoliaParameter() { Label = "CHA", Value = ToModifierString(character.CharismaModifier) });
+        data.Params.Add(new CCFoliaParameter() { Label = "Passive Perception", Value = ToModifierString(character.PassivePerception) });
+        data.Params.Add(new CCFoliaParameter() { Label = "Passive Investigation", Value = ToModifierString(character.PassiveInvestigation) });
+        data.Params.Add(new CCFoliaParameter() { Label = "Passive Insight", Value = ToModifierString(character.PassiveInsight) });
+
+        var commands = new StringBuilder();
+        commands.AppendLine($"1d20{ToDiceModifierString(character.DexterityModifier)} Initiative");
+        foreach (var hitDie in character.HitDice)
+        {
+            commands.AppendLine($"1d{hitDie.Sides} Hit dice (max {hitDie.Count} times)");
+        }
+
+        if (character.Attacks.Count > 0)
+        {
+            commands.AppendLine("=================  Attacks  ================");
+            foreach (var attackGroup in character.Attacks.GroupBy(a => a.Name))
+            {
+                foreach (var (index, attack) in attackGroup.Index())
+                {
+                    if (index == 0 && !attack.HideAttack) commands.AppendLine($"1d20{attack.AttackBonus} [{attack.Name}] Attack roll");
+
+                    if (attack.Level.HasValue)
+                    {
+                        commands.AppendLine($"{attack.Damage} [{attack.Name}] [Slot {attack.Level}] Damage");
+                        if (!attack.CanNotCrit)
+                        {
+                            var criticalDie = attack.Damage with
+                            {
+                                Count = attack.Damage.Count * 2
+                            };
+                            commands.AppendLine($"{criticalDie} [{attack.Name}] [Slot {attack.Level}] Critical");
+                        }
+                    }
+                    else
+                    {
+                        commands.AppendLine($"{attack.Damage} [{attack.Name}] Damage");
+                        if (!attack.CanNotCrit)
+                        {
+                            var criticalDie = attack.Damage with
+                            {
+                                Count = attack.Damage.Count * 2
+                            };
+                            commands.AppendLine($"{criticalDie} [{attack.Name}] Critical");
+                        }
+                    }
+                }
+            }
+
+
+        }
+
+        if (character.SpellEffects.Count > 0)
+        {
+            commands.AppendLine("=================  Spells  ================");
+            foreach (var spellEffect in character.SpellEffects)
+            {
+                if (spellEffect.Level.HasValue)
+                {
+                    commands.AppendLine($"{spellEffect.Damage} [{spellEffect.Name}] [Slot {spellEffect.Level}] Damage");
+                }
+                else
+                {
+                    commands.AppendLine($"{spellEffect.Damage} [{spellEffect.Name}] Damage");
+                }
+            }
+        }
+
+        commands.AppendLine("===========  Saving Throws  ==========");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.StrengthSavingThrowModifier)} [STR] Saving throw");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.DexteritySavingThrowModifier)} [DEX] Saving throw");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.ConstitutionSavingThrowModifier)} [CON] Saving throw");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.IntelligenceSavingThrowModifier)} [INT] Saving throw");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.WisdomSavingThrowModifier)} [WIS] Saving throw");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.CharismaSavingThrowModifier)} [CHA] Saving throw");
+
+        commands.AppendLine("=============  Abilities  ===============");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.AcrobaticsModifier)} [Acrobatics] Ability check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.AnimalHandlingModifier)} [Animal Handling] Ability check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.ArcanaModifier)} [Arcana] Ability check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.AthleticsModifier)} [Athletics] Ability check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.DeceptionModifier)} [Deception] Ability check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.HistoryModifier)} [History] Ability check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.InsightModifier)} [Insight] Ability check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.IntimidationModifier)} [Intimidation] Ability check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.InvestigationModifier)} [Investigation] Ability check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.MedicineModifier)} [Medicine] Ability check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.NatureModifier)} [Nature] Ability check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.PerceptionModifier)} [Perception] Ability check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.PerformanceModifier)} [Performance] Ability check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.PersuasionModifier)} [Persuasion] Ability check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.ReligionModifier)} [Religion] Ability check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.SleightOfHandModifier)} [Sleight Of Hand] Ability check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.StealthModifier)} [Stealth] Ability check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.SurvivalModifier)} [Survival] Ability check");
+
+        commands.AppendLine("=============  Skills  ================");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.StrengthModifier)} [STR] Skill check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.DexterityModifier)} [DEX] Skill check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.ConstitutionModifier)} [CON] Skill check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.IntelligenceModifier)} [INT] Skill check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.WisdomModifier)} [WIS] Skill check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.CharismaModifier)} [CHA] Skill check");
+
+        ccfoliaCharacter.Data.Commands = commands.Replace("\r\n", "\n").ToString().Trim();
+
+        return ccfoliaCharacter;
+
+        string ToModifierString(int value) => value switch
+        {
+            > 0 => $"+{value}",
+            0 => "0",
+            < 0 => $"{value}"
+        };
+        string ToDiceModifierString(int value) => value switch
+        {
+            > 0 => $"+{value}",
+            0 => "",
+            < 0 => $"{value}"
+        };
+    }
+
+    private async Task ReadSpellEffects(CharacterData data, Character character)
     {
         var maxSlotLevel = GetMaxSpellSlotLevel(character);
+
         foreach (var classSpells in data.ClassSpells)
         {
             var characterClass = data.Classes.FirstOrDefault(c => c.Id == classSpells.CharacterClassId);
@@ -88,51 +239,68 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
                 _ => 0
             };
 
-            foreach (var spell in classSpells.Spells)
+            var spells = classSpells.Spells.Select(s => s.Definition);
+
+            if (characterClass.SubclassDefinition != null)
             {
-                var damageModifier = spell.Definition.Modifiers.FirstOrDefault(m => m.Type == "damage");
-                if (damageModifier == null) continue;
+                var alwaysPreparedSpells = await apiClient.GetAlwaysPreparedSpellsAsync(characterClass.SubclassDefinition.Id, characterClass.Level);
+                spells = spells.Concat(alwaysPreparedSpells.Select(s => s.Definition));
+            }
 
-                if (damageModifier.AtHigherLevels.HigherLevelDefinitions.Length == 1)
-                {
-                    // Upcastable spell with scaling
-                    for (int i = spell.Definition.Level; i < maxSlotLevel; i++)
-                    {
-                        if (spell.Definition.RequiresSavingThrow)
-                        {
-                            var spellEffect = new SpellEffect()
-                            {
-                                Name = spell.Definition.Name,
-                                SpellSaveAbilityId = spell.Definition.SaveDcAbilityId,
-                                SpellSaveDc = GetSpellSaveDc(spellcastingModifier, character),
-                                Damage = GetUpcastDamageDie(damageModifier, spell.Definition.Level, i),
-                                Level = i
-                            };
+            foreach (var spell in spells.DistinctBy(d => d.Id))
+            {
+                ReadSpell(spell, character, maxSlotLevel, spellcastingModifier);
+            }
+        }
 
-                            character.SpellEffects.Add(spellEffect);
-                        }
-                        else
-                        {
-                            character.Attacks.Add(new Attack()
-                            {
-                                Name = spell.Definition.Name,
-                                AttackBonus = character.ProficiencyBonus + spellcastingModifier,
-                                Damage = GetUpcastDamageDie(damageModifier, spell.Definition.Level, i),
-                                Level = i
-                            });
-                        }
-                    }
-                }
-                else
+        ReadSpells(data.Spells.Race, character, maxSlotLevel);
+        ReadSpells(data.Spells.Class, character, maxSlotLevel);
+        ReadSpells(data.Spells.Background, character, maxSlotLevel);
+        ReadSpells(data.Spells.Item, character, maxSlotLevel);
+        ReadSpells(data.Spells.Feat, character, maxSlotLevel);
+
+        void ReadSpells(Spell[]? spells, Character character, int maxSlotLevel)
+        {
+            if (spells == null) return;
+
+            foreach (var spell in spells)
+            {
+                if (spell.DisplayAsAttack.HasValue && !spell.DisplayAsAttack.Value) continue;
+
+                var spellcastingModifier = spell.SpellCastingAbilityId switch
                 {
-                    if (spell.Definition.RequiresSavingThrow)
+                    StatIds.Strength => character.StrengthModifier,
+                    StatIds.Dexterity => character.DexterityModifier,
+                    StatIds.Constitution => character.ConstitutionModifier,
+                    StatIds.Intelligence => character.IntelligenceModifier,
+                    StatIds.Wisdom => character.WisdomModifier,
+                    StatIds.Charisma => character.CharismaModifier,
+                    _ => 0
+                };
+
+                ReadSpell(spell.Definition, character, maxSlotLevel, spellcastingModifier);
+            }
+        }
+
+        void ReadSpell(SpellDefinition spell, Character character, int maxSlotLevel, int spellcastingModifier)
+        {
+            var damageModifier = spell.Modifiers.FirstOrDefault(m => m.Type == "damage");
+            if (damageModifier == null) return;
+
+            if (damageModifier.AtHigherLevels.HigherLevelDefinitions.Length == 1)
+            {
+                // Upcastable spell with scaling
+                for (int i = spell.Level; i <= maxSlotLevel; i++)
+                {
+                    if (spell.RequiresSavingThrow)
                     {
                         var spellEffect = new SpellEffect()
                         {
-                            Name = spell.Definition.Name,
-                            SpellSaveAbilityId = spell.Definition.SaveDcAbilityId,
+                            Name = spell.Name,
+                            SpellSaveAbilityId = spell.SaveDcAbilityId,
                             SpellSaveDc = GetSpellSaveDc(spellcastingModifier, character),
-                            Damage = GetDamageDie(damageModifier, character)
+                            Damage = GetUpcastDamageDie(damageModifier, spell.Level, i),
+                            Level = i
                         };
 
                         character.SpellEffects.Add(spellEffect);
@@ -141,11 +309,62 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
                     {
                         character.Attacks.Add(new Attack()
                         {
-                            Name = spell.Definition.Name,
+                            Name = spell.Name,
+                            AttackBonus = character.ProficiencyBonus + spellcastingModifier,
+                            Damage = GetUpcastDamageDie(damageModifier, spell.Level, i),
+                            Level = i
+                        });
+                    }
+                }
+            }
+            else
+            {
+                if (spell.RequiresSavingThrow)
+                {
+                    var spellEffect = new SpellEffect()
+                    {
+                        Name = spell.Name,
+                        SpellSaveAbilityId = spell.SaveDcAbilityId,
+                        SpellSaveDc = GetSpellSaveDc(spellcastingModifier, character),
+                        Damage = GetDamageDie(damageModifier, character)
+                    };
+
+                    character.SpellEffects.Add(spellEffect);
+                }
+                else if (spell.RequiresAttackRoll)
+                {
+                    if (spell.AttackType == AttackType.Melee)
+                    {
+                        // This spell is attached to melee weapon attack
+                        character.Attacks.Add(new Attack()
+                        {
+                            Name = spell.Name,
+                            AttackBonus = 0,
+                            HideAttack = true,
+                            CanNotCrit = true,
+                            Damage = GetDamageDie(damageModifier, character),
+                        });
+                    }
+                    else
+                    {
+                        character.Attacks.Add(new Attack()
+                        {
+                            Name = spell.Name,
                             AttackBonus = character.ProficiencyBonus + spellcastingModifier,
                             Damage = GetDamageDie(damageModifier, character),
                         });
                     }
+                }
+                else
+                {
+                    character.Attacks.Add(new Attack()
+                    {
+                        Name = spell.Name,
+                        AttackBonus = 0,
+                        HideAttack = true,
+                        CanNotCrit = true,
+                        Damage = GetDamageDie(damageModifier, character),
+                    });
                 }
             }
         }
@@ -169,9 +388,9 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
         var damageDie = Die.Zero;
         if (damageModifier.Die.DiceValue.HasValue && damageModifier.Die.DiceCount.HasValue)
         {
-            damageDie = new Die() 
-            { 
-                Count = damageModifier.Die.DiceCount.Value, 
+            damageDie = new Die()
+            {
+                Count = damageModifier.Die.DiceCount.Value,
                 Sides = damageModifier.Die.DiceValue.Value,
                 Modifier = damageModifier.Die.FixedValue ?? 0
             };
@@ -199,22 +418,42 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
 
         if (higherLevelDefinition != null && higherLevelDefinition.Dice != null && higherLevelDefinition.Dice.DiceValue.HasValue && higherLevelDefinition.Dice.DiceCount.HasValue)
         {
-            return new Die() 
-            { 
-                Count = higherLevelDefinition.Dice.DiceCount.Value, 
-                Sides = higherLevelDefinition.Dice.DiceValue.Value,
-                Modifier = higherLevelDefinition.Dice.FixedValue ?? 0
-            };
+            if (damageModifier.AtHigherLevels.HigherLevelDefinitions.Length > 1)
+            {
+                // Use value from the definition as it seems to be precomputed
+                return new Die()
+                {
+                    Count = higherLevelDefinition.Dice.DiceCount.Value,
+                    Sides = higherLevelDefinition.Dice.DiceValue.Value,
+                    Modifier = higherLevelDefinition.Dice.FixedValue ?? 0
+                };
+            }
+            else
+            {
+                // Treat value from definition as a bonus value
+                if (damageModifier.Die.DiceCount.HasValue)
+                {
+                    return new Die()
+                    {
+                        Count = damageModifier.Die.DiceCount.Value + higherLevelDefinition.Dice.DiceCount.Value,
+                        Sides = higherLevelDefinition.Dice.DiceValue.Value,
+                        Modifier = higherLevelDefinition.Dice.FixedValue ?? 0
+                    };
+                }
+            }
         }
-
-        if (damageModifier.Die.DiceValue.HasValue && damageModifier.Die.DiceCount.HasValue)
+        else
         {
-            return new Die() 
-            { 
-                Count = damageModifier.Die.DiceCount.Value, 
-                Sides = damageModifier.Die.DiceValue.Value,
-                Modifier = damageModifier.Die.FixedValue ?? 0
-            };
+            // No scaling, use base damage only
+            if (damageModifier.Die.DiceValue.HasValue && damageModifier.Die.DiceCount.HasValue)
+            {
+                return new Die()
+                {
+                    Count = damageModifier.Die.DiceCount.Value,
+                    Sides = damageModifier.Die.DiceValue.Value,
+                    Modifier = damageModifier.Die.FixedValue ?? 0
+                };
+            }
         }
 
         return Die.Zero;
@@ -222,7 +461,7 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
 
     private static int GetSpellSaveDc(int spellcastingModifier, Character character) => 8 + spellcastingModifier + character.ProficiencyBonus;
 
-    private void ReadSpellSlots(Data data, Character character)
+    private void ReadSpellSlots(CharacterData data, Character character)
     {
         var spellcasterLevel = 0f;
         foreach (var characterClass in data.Classes)
@@ -294,7 +533,7 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
         [4, 3, 3, 3, 3, 2, 2, 1, 1]
     ];
 
-    private static void ReadWeaponAttacks(Data data, Character character)
+    private static void ReadWeaponAttacks(CharacterData data, Character character)
     {
         var equippedWeapons = data.Inventory
             .Where(e => e.Equipped)
@@ -305,21 +544,29 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
         foreach (var weapon in equippedWeapons)
         {
             if (weapon.Definition.Damage == null) continue;
-            if (!weapon.Definition.Damage.DiceCount.HasValue) continue; 
+            if (!weapon.Definition.Damage.DiceCount.HasValue) continue;
             if (!weapon.Definition.Damage.DiceValue.HasValue) continue;
             if (!weapon.Definition.CategoryId.HasValue) continue;
 
-            var damageDie = new Die()
-            {
-                Count = weapon.Definition.Damage.DiceCount.Value,
-                Sides = weapon.Definition.Damage.DiceValue.Value
-            };
+
 
             var isFinesseWeapon = weapon.Definition.Properties.Any(p => p.Name == "Finesse");
             var attackBonus = isFinesseWeapon switch
             {
                 true => Math.Max(character.StrengthModifier, character.DexterityModifier),
                 false => character.StrengthModifier
+            };
+            var damageBonus = isFinesseWeapon switch
+            {
+                true => Math.Max(character.StrengthModifier, character.DexterityModifier),
+                false => character.StrengthModifier
+            };
+
+            var damageDie = new Die()
+            {
+                Count = weapon.Definition.Damage.DiceCount.Value,
+                Sides = weapon.Definition.Damage.DiceValue.Value,
+                Modifier = damageBonus
             };
 
             var weaponCategory = weapon.Definition.CategoryId.Value switch
@@ -349,14 +596,64 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
                     {
                         Name = weapon.Definition.Name,
                         AttackBonus = new Modifier(attackBonus),
-                        Damage = versatileDamageDie.Value
+                        Damage = versatileDamageDie.Value with
+                        {
+                            Modifier = damageBonus
+                        }
                     });
                 }
             }
         }
     }
 
-    private static void ReadAc(Data data, Character character)
+    private void ReadActions(CharacterData characterData, Character character)
+    {
+        ReadAction(characterData.Actions.Race, character);
+        ReadAction(characterData.Actions.Class, character);
+        ReadAction(characterData.Actions.Background, character);
+        ReadAction(characterData.Actions.Item, character);
+        ReadAction(characterData.Actions.Feat, character);
+
+        static void ReadAction(CharacterAction[]? actions, Character character)
+        {
+            if (actions == null) return;
+
+            foreach (var action in actions)
+            {
+                if (action.Dice == null) continue;
+                if (!action.Dice.DiceCount.HasValue) continue;
+                if (!action.Dice.DiceValue.HasValue) continue;
+                if (action.DisplayAsAttack.HasValue && !action.DisplayAsAttack.Value) continue;
+
+                var damageDie = new Die()
+                {
+                    Count = action.Dice.DiceCount.Value,
+                    Sides = action.Dice.DiceValue.Value,
+                    Modifier = action.Dice.FixedValue ?? 0
+                };
+
+                if (action.SaveStatId.HasValue)
+                {
+                    character.SpellEffects.Add(new SpellEffect()
+                    {
+                        Name = action.Name,
+                        SpellSaveAbilityId = action.SaveStatId,
+                        Damage = damageDie
+                    });
+                }
+                else
+                {
+                    character.Attacks.Add(new Attack()
+                    {
+                        Name = action.Name,
+                        Damage = damageDie
+                    });
+                }
+            }
+        }
+    }
+
+    private static void ReadAc(CharacterData data, Character character)
     {
         var equippedArmor = data.Inventory
             .Where(e => e.Equipped)
@@ -385,7 +682,7 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
         }
     }
 
-    private static void ReadBaseDetails(Data data, Character character)
+    private static void ReadBaseDetails(CharacterData data, Character character)
     {
         character.Name = data.Name;
         character.Level = data.Classes.Sum(c => c.Level);
@@ -433,12 +730,14 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
         character.SurvivalModifier = character.WisdomModifier + GetProficiencyBonus(data.Modifiers, "survival", character);
 
         character.PassivePerception = 10 + character.PerceptionModifier;
+        character.PassiveInvestigation = 10 + character.InvestigationModifier;
+        character.PassiveInsight = 10 + character.InsightModifier;
         character.MaxHp = CalculateMaxHp(data, character);
         character.CurrentHp = character.MaxHp - data.RemovedHitPoints;
         character.TemporaryHp = data.TemporaryHitPoints;
     }
 
-    private static int CalculateMaxHp(Data data, Character character)
+    private static int CalculateMaxHp(CharacterData data, Character character)
     {
         var classes = data.Classes;
         var totalHp = 0;
@@ -495,7 +794,7 @@ internal partial class DndBeyondAdapter(HttpClient httpClient) : ICharacterSheet
         return character.ProficiencyBonus;
     }
 
-    private static int SumAbilityScores(StatIds statId, Data data)
+    private static int SumAbilityScores(StatIds statId, CharacterData data)
     {
         var overrideStat = data.OverrideStats.FirstOrDefault(s => s.Id == statId);
         if (overrideStat != null && overrideStat.Value.HasValue) return overrideStat.Value.Value;

@@ -1,0 +1,326 @@
+{
+  "id": 0,
+  "success": true,
+  "message": "Always prepared spells successfully received.",
+  "data": [
+    {
+      "overrideSaveDc": null,
+      "limitedUse": null,
+      "id": 2640857,
+      "entityTypeId": 435869154,
+      "definition": {
+        "id": 2247,
+        "definitionKey": "1118725998:2247",
+        "name": "Shield",
+        "level": 1,
+        "school": "Abjuration",
+        "duration": {
+          "durationInterval": 1,
+          "durationUnit": "Round",
+          "durationType": "Time"
+        },
+        "activation": {
+          "activationTime": 1,
+          "activationType": 4
+        },
+        "range": {
+          "origin": "Self",
+          "rangeValue": 0,
+          "aoeType": null,
+          "aoeValue": null
+        },
+        "asPartOfWeaponAttack": false,
+        "description": "<p>An invisible barrier of magical force appears and protects you. Until the start of your next turn, you have a +5 bonus to AC, including against the triggering attack, and you take no damage from <strong>magic missile</strong>.</p>",
+        "snippet": "",
+        "concentration": false,
+        "ritual": false,
+        "rangeArea": null,
+        "damageEffect": null,
+        "components": [ 1, 2 ],
+        "componentsDescription": "",
+        "saveDcAbilityId": null,
+        "healing": null,
+        "healingDice": [],
+        "tempHpDice": [],
+        "attackType": null,
+        "canCastAtHigherLevel": false,
+        "isHomebrew": false,
+        "version": null,
+        "sourceId": null,
+        "sourcePageNumber": 275,
+        "requiresSavingThrow": false,
+        "requiresAttackRoll": false,
+        "atHigherLevels": {
+          "higherLevelDefinitions": [],
+          "additionalAttacks": [],
+          "additionalTargets": [],
+          "areaOfEffect": [],
+          "duration": [],
+          "creatures": [],
+          "special": [],
+          "points": [],
+          "range": []
+        },
+        "modifiers": [
+          {
+            "fixedValue": null,
+            "id": "spell_2247_249",
+            "entityId": null,
+            "entityTypeId": null,
+            "type": "bonus",
+            "subType": "armor-class",
+            "dice": null,
+            "restriction": "Until the start of your next turn",
+            "statId": null,
+            "requiresAttunement": false,
+            "duration": null,
+            "friendlyTypeName": "Bonus",
+            "friendlySubtypeName": "Armor Class",
+            "isGranted": false,
+            "bonusTypes": [],
+            "value": null,
+            "availableToMulticlass": null,
+            "modifierTypeId": 0,
+            "modifierSubTypeId": 0,
+            "componentId": 0,
+            "componentTypeId": 0,
+            "die": {
+              "diceCount": null,
+              "diceValue": null,
+              "diceMultiplier": null,
+              "fixedValue": 5,
+              "diceString": null
+            },
+            "count": 1,
+            "durationUnit": null,
+            "usePrimaryStat": false,
+            "atHigherLevels": {
+              "higherLevelDefinitions": [],
+              "additionalAttacks": [],
+              "additionalTargets": [],
+              "areaOfEffect": [],
+              "duration": [],
+              "creatures": [],
+              "special": [],
+              "points": [],
+              "range": []
+            }
+          }
+        ],
+        "conditions": [],
+        "tags": [ "Warding" ],
+        "castingTimeDescription": "which you take when you are hit by an attack or targeted by the magic missile spell",
+        "scaleType": null,
+        "sources": [
+          {
+            "sourceId": 1,
+            "pageNumber": null,
+            "sourceType": 2
+          },
+          {
+            "sourceId": 2,
+            "pageNumber": 275,
+            "sourceType": 1
+          }
+        ],
+        "spellGroups": [],
+        "isLegacy": true
+      },
+      "definitionId": 0,
+      "prepared": false,
+      "countsAsKnownSpell": false,
+      "usesSpellSlot": true,
+      "castAtLevel": null,
+      "alwaysPrepared": true,
+      "restriction": null,
+      "spellCastingAbilityId": null,
+      "displayAsAttack": null,
+      "additionalDescription": null,
+      "castOnlyAsRitual": false,
+      "ritualCastingType": null,
+      "range": {
+        "origin": "Self",
+        "rangeValue": 0,
+        "aoeType": null,
+        "aoeValue": null
+      },
+      "activation": {
+        "activationTime": 1,
+        "activationType": 4
+      },
+      "baseLevelAtWill": false,
+      "atWillLimitedUseLevel": null,
+      "isSignatureSpell": null,
+      "componentId": 0,
+      "componentTypeId": 0,
+      "spellListId": null
+    },
+    {
+      "overrideSaveDc": null,
+      "limitedUse": null,
+      "id": 2640858,
+      "entityTypeId": 435869154,
+      "definition": {
+        "id": 2278,
+        "definitionKey": "1118725998:2278",
+        "name": "Thunderwave",
+        "level": 1,
+        "school": "Evocation",
+        "duration": {
+          "durationInterval": 0,
+          "durationUnit": null,
+          "durationType": "Instantaneous"
+        },
+        "activation": {
+          "activationTime": 1,
+          "activationType": 1
+        },
+        "range": {
+          "origin": "Self",
+          "rangeValue": 0,
+          "aoeType": "Cube",
+          "aoeValue": 15
+        },
+        "asPartOfWeaponAttack": false,
+        "description": "<p>A wave of thunderous force sweeps out from you. Each creature in a 15-foot cube originating from you must make a Constitution saving throw. On a failed save, a creature takes 2d8 thunder damage and is pushed 10 feet away from you. On a successful save, the creature takes half as much damage and isn't pushed.</p>\r\n<p>In addition, unsecured objects that are completely within the area of effect are automatically pushed 10 feet away from you by the spell's effect, and the spell emits a thunderous boom audible out to 300 feet.</p>\r\n<p><strong>At Higher Levels.</strong> When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d8 for each slot level above 1st.</p>",
+        "snippet": "",
+        "concentration": false,
+        "ritual": false,
+        "rangeArea": null,
+        "damageEffect": null,
+        "components": [ 1, 2 ],
+        "componentsDescription": "",
+        "saveDcAbilityId": 3,
+        "healing": null,
+        "healingDice": [],
+        "tempHpDice": [],
+        "attackType": null,
+        "canCastAtHigherLevel": true,
+        "isHomebrew": false,
+        "version": null,
+        "sourceId": null,
+        "sourcePageNumber": 282,
+        "requiresSavingThrow": true,
+        "requiresAttackRoll": false,
+        "atHigherLevels": {
+          "higherLevelDefinitions": [],
+          "additionalAttacks": [],
+          "additionalTargets": [],
+          "areaOfEffect": [],
+          "duration": [],
+          "creatures": [],
+          "special": [],
+          "points": [],
+          "range": []
+        },
+        "modifiers": [
+          {
+            "fixedValue": null,
+            "id": "spell_2278_285",
+            "entityId": null,
+            "entityTypeId": null,
+            "type": "damage",
+            "subType": "thunder",
+            "dice": null,
+            "restriction": "",
+            "statId": null,
+            "requiresAttunement": false,
+            "duration": null,
+            "friendlyTypeName": "Damage",
+            "friendlySubtypeName": "Thunder",
+            "isGranted": false,
+            "bonusTypes": [],
+            "value": null,
+            "availableToMulticlass": null,
+            "modifierTypeId": 0,
+            "modifierSubTypeId": 0,
+            "componentId": 0,
+            "componentTypeId": 0,
+            "die": {
+              "diceCount": 2,
+              "diceValue": 8,
+              "diceMultiplier": null,
+              "fixedValue": null,
+              "diceString": "2d8"
+            },
+            "count": 1,
+            "durationUnit": null,
+            "usePrimaryStat": false,
+            "atHigherLevels": {
+              "higherLevelDefinitions": [
+                {
+                  "level": 1,
+                  "typeId": 15,
+                  "dice": {
+                    "diceCount": 1,
+                    "diceValue": 8,
+                    "diceMultiplier": null,
+                    "fixedValue": 0,
+                    "diceString": "1d8"
+                  },
+                  "value": null,
+                  "details": ""
+                }
+              ],
+              "additionalAttacks": [],
+              "additionalTargets": [],
+              "areaOfEffect": [],
+              "duration": [],
+              "creatures": [],
+              "special": [],
+              "points": [],
+              "range": []
+            }
+          }
+        ],
+        "conditions": [],
+        "tags": [ "Damage", "Control" ],
+        "castingTimeDescription": "",
+        "scaleType": "spellscale",
+        "sources": [
+          {
+            "sourceId": 1,
+            "pageNumber": null,
+            "sourceType": 2
+          },
+          {
+            "sourceId": 2,
+            "pageNumber": 282,
+            "sourceType": 1
+          }
+        ],
+        "spellGroups": [],
+        "isLegacy": true
+      },
+      "definitionId": 0,
+      "prepared": false,
+      "countsAsKnownSpell": false,
+      "usesSpellSlot": true,
+      "castAtLevel": null,
+      "alwaysPrepared": true,
+      "restriction": null,
+      "spellCastingAbilityId": null,
+      "displayAsAttack": null,
+      "additionalDescription": null,
+      "castOnlyAsRitual": false,
+      "ritualCastingType": null,
+      "range": {
+        "origin": "Self",
+        "rangeValue": 0,
+        "aoeType": "Cube",
+        "aoeValue": 15
+      },
+      "activation": {
+        "activationTime": 1,
+        "activationType": 1
+      },
+      "baseLevelAtWill": false,
+      "atWillLimitedUseLevel": null,
+      "isSignatureSpell": null,
+      "componentId": 0,
+      "componentTypeId": 0,
+      "spellListId": null
+    }
+  ],
+  "pagination": null
+}

@@ -1,6 +1,5 @@
 ﻿using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
-using CatsUdon.CharacterSheets.CCFolia;
 using CatsUdon.CharacterSheets.Adapters.Abstractions;
 using CatsUdon.CharacterSheets.CCFolia;
 using CatsUdon.CharacterSheets.Memo;
@@ -83,7 +82,7 @@ internal static class NechronicaConverter
         var timingOrder = new[] { Timings.Rapid, Timings.Judge, Timings.Damage, Timings.Action, Timings.Auto };
         foreach (var (index, timing) in timingOrder.Index())
         {
-            
+
             if (index > 0)
             {
                 memoBuilder.NewLine().NewLine();
@@ -125,7 +124,7 @@ internal static class NechronicaConverter
 
         var maxPartsInGroup = character.Parts.GroupBy(p => p.Type).Max(g => g.Count());
         var grid = new Grid();
-        
+
         var types = new[] { PartTypes.Head, PartTypes.Arm, PartTypes.Body, PartTypes.Leg };
         foreach (var (col, type) in types.Index())
         {
@@ -152,7 +151,7 @@ internal static class NechronicaConverter
         return sheets;
     }
 
-    private static void ReadCharacter(Character character,IHtmlDocument document)
+    private static void ReadCharacter(Character character, IHtmlDocument document)
     {
         character.Name = document.QuerySelectorValue(CssSelectors.CharacterName);
         character.ActionValue = int.Parse(document.QuerySelectorValue(CssSelectors.ActionValue));
@@ -164,13 +163,13 @@ internal static class NechronicaConverter
 
             ReadPart(part, partRow);
 
-            var isEmpty = string.IsNullOrWhiteSpace(part.Name) 
-                && part.Category == PartCategories.None 
-                && part.Type == PartTypes.None 
-                && part.Timing == Timings.Auto 
-                && string.IsNullOrWhiteSpace(part.Cost) 
+            var isEmpty = string.IsNullOrWhiteSpace(part.Name)
+                && part.Category == PartCategories.None
+                && part.Type == PartTypes.None
+                && part.Timing == Timings.Auto
+                && string.IsNullOrWhiteSpace(part.Cost)
                 && string.IsNullOrWhiteSpace(part.Range)
-                && string.IsNullOrWhiteSpace(part.Effect) 
+                && string.IsNullOrWhiteSpace(part.Effect)
                 && string.IsNullOrWhiteSpace(part.Source);
 
             if (isEmpty) continue;
@@ -201,7 +200,7 @@ internal static class NechronicaConverter
         {
             part.Name = partRow.QuerySelectorValue(CssSelectors.Parts.Name);
             var categoryValue = partRow.QuerySelectorValue(CssSelectors.Parts.Category);
-            if (int.TryParse(categoryValue, out var category)) 
+            if (int.TryParse(categoryValue, out var category))
             {
                 part.Category = (PartCategories)category;
             }

@@ -9,6 +9,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDndBeyond(this IServiceCollection services)
     {
         services.AddSingleton<ICharacterSheetAdapter, DndBeyondAdapter>();
+        services.AddSingleton<IDndBeyondApiClient, DndBeyondApiClient>();
 
         return services;
     }

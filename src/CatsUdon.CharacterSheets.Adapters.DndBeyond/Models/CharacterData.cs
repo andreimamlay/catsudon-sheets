@@ -1,6 +1,6 @@
 ﻿namespace CatsUdon.CharacterSheets.Adapters.DndBeyond.Models;
 
-internal class Data
+internal class CharacterData
 {
     public required string Name { get; set; }
     public int BaseHitPoints { get; set; }
@@ -14,4 +14,6 @@ internal class Data
     public required Class[] Classes { get; set; }
     public required Equipment[] Inventory { get; set; }
     public required ClassSpells[] ClassSpells { get; set; }
+    public required SpellsTable Spells { get; set; }
+    public required ActionsTable Actions { get; set; }
 }

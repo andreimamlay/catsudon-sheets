@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace CatsUdon.CharacterSheets;
 
-[DebuggerDisplay("{Count}d{Sides}{Modifier}")]
+[DebuggerDisplay("{ToString()}")]
 public readonly partial struct Die
 {
     [GeneratedRegex(@"^(?<count>\d+)d(?<sides>\d+)(?<modifier>(\+|-)\d+)?$")]
@@ -32,7 +32,7 @@ public readonly partial struct Die
         Modifier? modifier = match.Groups["modifier"].Success
             ? int.Parse(match.Groups["modifier"].Value)
             : default;
-        
+
         die = new Die()
         {
             Count = count,
@@ -42,7 +42,7 @@ public readonly partial struct Die
 
         return true;
     }
-    
+
     public int Count { get; init; }
     public int Sides { get; init; }
     public Modifier? Modifier { get; init; }

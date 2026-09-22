@@ -1,0 +1,1072 @@
+{
+  "id": 0,
+  "success": true,
+  "message": "Always prepared spells successfully received.",
+  "data": [
+    {
+      "overrideSaveDc": null,
+      "limitedUse": null,
+      "id": 136106,
+      "entityTypeId": 435869154,
+      "definition": {
+        "id": 2012,
+        "definitionKey": "1118725998:2012",
+        "name": "Beacon of Hope",
+        "level": 3,
+        "school": "Abjuration",
+        "duration": {
+          "durationInterval": 1,
+          "durationUnit": "Minute",
+          "durationType": "Concentration"
+        },
+        "activation": {
+          "activationTime": 1,
+          "activationType": 1
+        },
+        "range": {
+          "origin": "Ranged",
+          "rangeValue": 30,
+          "aoeType": null,
+          "aoeValue": null
+        },
+        "asPartOfWeaponAttack": false,
+        "description": "<p>This spell bestows hope and vitality. Choose any number of creatures within range. For the duration, each target has advantage on Wisdom saving throws and death saving throws, and regains the maximum number of hit points possible from any healing.</p>",
+        "snippet": "",
+        "concentration": true,
+        "ritual": false,
+        "rangeArea": null,
+        "damageEffect": null,
+        "components": [ 1, 2 ],
+        "componentsDescription": "",
+        "saveDcAbilityId": null,
+        "healing": null,
+        "healingDice": [],
+        "tempHpDice": [],
+        "attackType": null,
+        "canCastAtHigherLevel": false,
+        "isHomebrew": false,
+        "version": null,
+        "sourceId": null,
+        "sourcePageNumber": 217,
+        "requiresSavingThrow": false,
+        "requiresAttackRoll": false,
+        "atHigherLevels": {
+          "higherLevelDefinitions": [],
+          "additionalAttacks": [],
+          "additionalTargets": [],
+          "areaOfEffect": [],
+          "duration": [],
+          "creatures": [],
+          "special": [],
+          "points": [],
+          "range": []
+        },
+        "modifiers": [
+          {
+            "fixedValue": null,
+            "id": "spell_2012_13",
+            "entityId": null,
+            "entityTypeId": null,
+            "type": "advantage",
+            "subType": "wisdom-saving-throws",
+            "dice": null,
+            "restriction": "",
+            "statId": null,
+            "requiresAttunement": false,
+            "duration": null,
+            "friendlyTypeName": "Advantage",
+            "friendlySubtypeName": "Wisdom Saving Throws",
+            "isGranted": false,
+            "bonusTypes": [],
+            "value": null,
+            "availableToMulticlass": null,
+            "modifierTypeId": 0,
+            "modifierSubTypeId": 0,
+            "componentId": 0,
+            "componentTypeId": 0,
+            "die": {
+              "diceCount": null,
+              "diceValue": null,
+              "diceMultiplier": null,
+              "fixedValue": null,
+              "diceString": null
+            },
+            "count": 1,
+            "durationUnit": null,
+            "usePrimaryStat": false,
+            "atHigherLevels": {
+              "higherLevelDefinitions": [],
+              "additionalAttacks": [],
+              "additionalTargets": [],
+              "areaOfEffect": [],
+              "duration": [],
+              "creatures": [],
+              "special": [],
+              "points": [],
+              "range": []
+            }
+          }
+        ],
+        "conditions": [],
+        "tags": [ "Buff" ],
+        "castingTimeDescription": "",
+        "scaleType": null,
+        "sources": [
+          {
+            "sourceId": 1,
+            "pageNumber": null,
+            "sourceType": 2
+          },
+          {
+            "sourceId": 2,
+            "pageNumber": 217,
+            "sourceType": 1
+          }
+        ],
+        "spellGroups": [],
+        "isLegacy": true
+      },
+      "definitionId": 0,
+      "prepared": false,
+      "countsAsKnownSpell": false,
+      "usesSpellSlot": true,
+      "castAtLevel": null,
+      "alwaysPrepared": true,
+      "restriction": null,
+      "spellCastingAbilityId": null,
+      "displayAsAttack": null,
+      "additionalDescription": null,
+      "castOnlyAsRitual": false,
+      "ritualCastingType": null,
+      "range": {
+        "origin": "Ranged",
+        "rangeValue": 30,
+        "aoeType": null,
+        "aoeValue": null
+      },
+      "activation": {
+        "activationTime": 1,
+        "activationType": 1
+      },
+      "baseLevelAtWill": false,
+      "atWillLimitedUseLevel": null,
+      "isSignatureSpell": null,
+      "componentId": 0,
+      "componentTypeId": 0,
+      "spellListId": null
+    },
+    {
+      "overrideSaveDc": null,
+      "limitedUse": null,
+      "id": 138387,
+      "entityTypeId": 435869154,
+      "definition": {
+        "id": 2164,
+        "definitionKey": "1118725998:2164",
+        "name": "Lesser Restoration",
+        "level": 2,
+        "school": "Abjuration",
+        "duration": {
+          "durationInterval": 0,
+          "durationUnit": null,
+          "durationType": "Instantaneous"
+        },
+        "activation": {
+          "activationTime": 1,
+          "activationType": 1
+        },
+        "range": {
+          "origin": "Touch",
+          "rangeValue": 0,
+          "aoeType": null,
+          "aoeValue": null
+        },
+        "asPartOfWeaponAttack": false,
+        "description": "<p>You touch a creature and can end either one disease or one condition afflicting it. The condition can be blinded, deafened, paralyzed, or poisoned.</p>",
+        "snippet": "",
+        "concentration": false,
+        "ritual": false,
+        "rangeArea": null,
+        "damageEffect": null,
+        "components": [ 1, 2 ],
+        "componentsDescription": "",
+        "saveDcAbilityId": null,
+        "healing": null,
+        "healingDice": [],
+        "tempHpDice": [],
+        "attackType": null,
+        "canCastAtHigherLevel": false,
+        "isHomebrew": false,
+        "version": null,
+        "sourceId": null,
+        "sourcePageNumber": 255,
+        "requiresSavingThrow": false,
+        "requiresAttackRoll": false,
+        "atHigherLevels": {
+          "higherLevelDefinitions": [],
+          "additionalAttacks": [],
+          "additionalTargets": [],
+          "areaOfEffect": [],
+          "duration": [],
+          "creatures": [],
+          "special": [],
+          "points": [],
+          "range": []
+        },
+        "modifiers": [],
+        "conditions": [
+          {
+            "type": 2,
+            "conditionId": 1,
+            "conditionDuration": 0,
+            "durationUnit": "Round",
+            "exception": "Choose Condition: blinded, deafened, paralyzed, or poisoned"
+          },
+          {
+            "type": 2,
+            "conditionId": 3,
+            "conditionDuration": 0,
+            "durationUnit": "Round",
+            "exception": "blinded, deafened, paralyzed, or poisoned"
+          },
+          {
+            "type": 2,
+            "conditionId": 9,
+            "conditionDuration": 0,
+            "durationUnit": "Round",
+            "exception": "blinded, deafened, paralyzed, or poisoned"
+          },
+          {
+            "type": 2,
+            "conditionId": 11,
+            "conditionDuration": 0,
+            "durationUnit": "Round",
+            "exception": "blinded, deafened, paralyzed, or poisoned"
+          }
+        ],
+        "tags": [ "Healing" ],
+        "castingTimeDescription": "",
+        "scaleType": null,
+        "sources": [
+          {
+            "sourceId": 1,
+            "pageNumber": null,
+            "sourceType": 2
+          },
+          {
+            "sourceId": 2,
+            "pageNumber": 255,
+            "sourceType": 1
+          }
+        ],
+        "spellGroups": [],
+        "isLegacy": true
+      },
+      "definitionId": 0,
+      "prepared": false,
+      "countsAsKnownSpell": false,
+      "usesSpellSlot": true,
+      "castAtLevel": null,
+      "alwaysPrepared": true,
+      "restriction": null,
+      "spellCastingAbilityId": null,
+      "displayAsAttack": null,
+      "additionalDescription": null,
+      "castOnlyAsRitual": false,
+      "ritualCastingType": null,
+      "range": {
+        "origin": "Touch",
+        "rangeValue": 0,
+        "aoeType": null,
+        "aoeValue": null
+      },
+      "activation": {
+        "activationTime": 1,
+        "activationType": 1
+      },
+      "baseLevelAtWill": false,
+      "atWillLimitedUseLevel": null,
+      "isSignatureSpell": null,
+      "componentId": 0,
+      "componentTypeId": 0,
+      "spellListId": null
+    },
+    {
+      "overrideSaveDc": null,
+      "limitedUse": null,
+      "id": 136126,
+      "entityTypeId": 435869154,
+      "definition": {
+        "id": 2016,
+        "definitionKey": "1118725998:2016",
+        "name": "Bless",
+        "level": 1,
+        "school": "Enchantment",
+        "duration": {
+          "durationInterval": 1,
+          "durationUnit": "Minute",
+          "durationType": "Concentration"
+        },
+        "activation": {
+          "activationTime": 1,
+          "activationType": 1
+        },
+        "range": {
+          "origin": "Ranged",
+          "rangeValue": 30,
+          "aoeType": null,
+          "aoeValue": null
+        },
+        "asPartOfWeaponAttack": false,
+        "description": "<p>You bless up to three creatures of your choice within range. Whenever a target makes an attack roll or a saving throw before the spell ends, the target can roll a d4 and add the number rolled to the attack roll or saving throw.</p>\r\n<p><strong>At Higher Levels.</strong> When you cast this spell using a spell slot of 2nd level or higher, you can target one additional creature for each slot level above 1st.</p>",
+        "snippet": "",
+        "concentration": true,
+        "ritual": false,
+        "rangeArea": null,
+        "damageEffect": null,
+        "components": [ 1, 2, 3 ],
+        "componentsDescription": "a sprinkling of holy water",
+        "saveDcAbilityId": null,
+        "healing": null,
+        "healingDice": [],
+        "tempHpDice": [],
+        "attackType": null,
+        "canCastAtHigherLevel": true,
+        "isHomebrew": false,
+        "version": null,
+        "sourceId": null,
+        "sourcePageNumber": 219,
+        "requiresSavingThrow": false,
+        "requiresAttackRoll": false,
+        "atHigherLevels": {
+          "higherLevelDefinitions": [
+            {
+              "level": 1,
+              "typeId": 1,
+              "dice": null,
+              "value": 1,
+              "details": ""
+            }
+          ],
+          "additionalAttacks": [],
+          "additionalTargets": [],
+          "areaOfEffect": [],
+          "duration": [],
+          "creatures": [],
+          "special": [],
+          "points": [],
+          "range": []
+        },
+        "modifiers": [
+          {
+            "fixedValue": null,
+            "id": "spell_2016_15",
+            "entityId": null,
+            "entityTypeId": null,
+            "type": "bonus",
+            "subType": "melee-weapon-attacks",
+            "dice": null,
+            "restriction": "Concentration",
+            "statId": null,
+            "requiresAttunement": false,
+            "duration": null,
+            "friendlyTypeName": "Bonus",
+            "friendlySubtypeName": "Melee Weapon Attacks",
+            "isGranted": false,
+            "bonusTypes": [],
+            "value": null,
+            "availableToMulticlass": null,
+            "modifierTypeId": 0,
+            "modifierSubTypeId": 0,
+            "componentId": 0,
+            "componentTypeId": 0,
+            "die": {
+              "diceCount": 1,
+              "diceValue": 4,
+              "diceMultiplier": null,
+              "fixedValue": null,
+              "diceString": "1d4"
+            },
+            "count": 1,
+            "durationUnit": null,
+            "usePrimaryStat": false,
+            "atHigherLevels": {
+              "higherLevelDefinitions": [],
+              "additionalAttacks": [],
+              "additionalTargets": [],
+              "areaOfEffect": [],
+              "duration": [],
+              "creatures": [],
+              "special": [],
+              "points": [],
+              "range": []
+            }
+          },
+          {
+            "fixedValue": null,
+            "id": "spell_2016_16",
+            "entityId": null,
+            "entityTypeId": null,
+            "type": "bonus",
+            "subType": "ranged-weapon-attacks",
+            "dice": null,
+            "restriction": "Concentration",
+            "statId": null,
+            "requiresAttunement": false,
+            "duration": null,
+            "friendlyTypeName": "Bonus",
+            "friendlySubtypeName": "Ranged Weapon Attacks",
+            "isGranted": false,
+            "bonusTypes": [],
+            "value": null,
+            "availableToMulticlass": null,
+            "modifierTypeId": 0,
+            "modifierSubTypeId": 0,
+            "componentId": 0,
+            "componentTypeId": 0,
+            "die": {
+              "diceCount": 1,
+              "diceValue": 4,
+              "diceMultiplier": null,
+              "fixedValue": null,
+              "diceString": "1d4"
+            },
+            "count": 1,
+            "durationUnit": null,
+            "usePrimaryStat": false,
+            "atHigherLevels": {
+              "higherLevelDefinitions": [],
+              "additionalAttacks": [],
+              "additionalTargets": [],
+              "areaOfEffect": [],
+              "duration": [],
+              "creatures": [],
+              "special": [],
+              "points": [],
+              "range": []
+            }
+          },
+          {
+            "fixedValue": null,
+            "id": "spell_2016_17",
+            "entityId": null,
+            "entityTypeId": null,
+            "type": "bonus",
+            "subType": "spell-attacks",
+            "dice": null,
+            "restriction": "Concentration",
+            "statId": null,
+            "requiresAttunement": false,
+            "duration": null,
+            "friendlyTypeName": "Bonus",
+            "friendlySubtypeName": "Spell Attacks",
+            "isGranted": false,
+            "bonusTypes": [],
+            "value": null,
+            "availableToMulticlass": null,
+            "modifierTypeId": 0,
+            "modifierSubTypeId": 0,
+            "componentId": 0,
+            "componentTypeId": 0,
+            "die": {
+              "diceCount": 1,
+              "diceValue": 4,
+              "diceMultiplier": null,
+              "fixedValue": null,
+              "diceString": "1d4"
+            },
+            "count": 1,
+            "durationUnit": null,
+            "usePrimaryStat": false,
+            "atHigherLevels": {
+              "higherLevelDefinitions": [],
+              "additionalAttacks": [],
+              "additionalTargets": [],
+              "areaOfEffect": [],
+              "duration": [],
+              "creatures": [],
+              "special": [],
+              "points": [],
+              "range": []
+            }
+          },
+          {
+            "fixedValue": null,
+            "id": "spell_2016_18",
+            "entityId": null,
+            "entityTypeId": null,
+            "type": "bonus",
+            "subType": "saving-throws",
+            "dice": null,
+            "restriction": "Concentration",
+            "statId": null,
+            "requiresAttunement": false,
+            "duration": null,
+            "friendlyTypeName": "Bonus",
+            "friendlySubtypeName": "Saving Throws",
+            "isGranted": false,
+            "bonusTypes": [],
+            "value": null,
+            "availableToMulticlass": null,
+            "modifierTypeId": 0,
+            "modifierSubTypeId": 0,
+            "componentId": 0,
+            "componentTypeId": 0,
+            "die": {
+              "diceCount": 1,
+              "diceValue": 4,
+              "diceMultiplier": null,
+              "fixedValue": null,
+              "diceString": "1d4"
+            },
+            "count": 1,
+            "durationUnit": null,
+            "usePrimaryStat": false,
+            "atHigherLevels": {
+              "higherLevelDefinitions": [],
+              "additionalAttacks": [],
+              "additionalTargets": [],
+              "areaOfEffect": [],
+              "duration": [],
+              "creatures": [],
+              "special": [],
+              "points": [],
+              "range": []
+            }
+          }
+        ],
+        "conditions": [],
+        "tags": [ "Buff" ],
+        "castingTimeDescription": "",
+        "scaleType": "spellscale",
+        "sources": [
+          {
+            "sourceId": 1,
+            "pageNumber": null,
+            "sourceType": 2
+          },
+          {
+            "sourceId": 2,
+            "pageNumber": 219,
+            "sourceType": 1
+          }
+        ],
+        "spellGroups": [],
+        "isLegacy": true
+      },
+      "definitionId": 0,
+      "prepared": false,
+      "countsAsKnownSpell": false,
+      "usesSpellSlot": true,
+      "castAtLevel": null,
+      "alwaysPrepared": true,
+      "restriction": null,
+      "spellCastingAbilityId": null,
+      "displayAsAttack": null,
+      "additionalDescription": null,
+      "castOnlyAsRitual": false,
+      "ritualCastingType": null,
+      "range": {
+        "origin": "Ranged",
+        "rangeValue": 30,
+        "aoeType": null,
+        "aoeValue": null
+      },
+      "activation": {
+        "activationTime": 1,
+        "activationType": 1
+      },
+      "baseLevelAtWill": false,
+      "atWillLimitedUseLevel": null,
+      "isSignatureSpell": null,
+      "componentId": 0,
+      "componentTypeId": 0,
+      "spellListId": null
+    },
+    {
+      "overrideSaveDc": null,
+      "limitedUse": null,
+      "id": 136483,
+      "entityTypeId": 435869154,
+      "definition": {
+        "id": 2056,
+        "definitionKey": "1118725998:2056",
+        "name": "Cure Wounds",
+        "level": 1,
+        "school": "Evocation",
+        "duration": {
+          "durationInterval": 0,
+          "durationUnit": null,
+          "durationType": "Instantaneous"
+        },
+        "activation": {
+          "activationTime": 1,
+          "activationType": 1
+        },
+        "range": {
+          "origin": "Touch",
+          "rangeValue": 0,
+          "aoeType": null,
+          "aoeValue": null
+        },
+        "asPartOfWeaponAttack": false,
+        "description": "<p>A creature you touch regains a number of hit points equal to 1d8 + your spellcasting ability modifier. This spell has no effect on undead or constructs.</p>\r\n<p><em><strong>At Higher Levels.</strong></em> When you cast this spell using a spell slot of 2nd level or higher, the healing increases by 1d8 for each slot level above 1st.</p>",
+        "snippet": "",
+        "concentration": false,
+        "ritual": false,
+        "rangeArea": null,
+        "damageEffect": null,
+        "components": [ 1, 2 ],
+        "componentsDescription": "",
+        "saveDcAbilityId": null,
+        "healing": null,
+        "healingDice": [],
+        "tempHpDice": [],
+        "attackType": null,
+        "canCastAtHigherLevel": true,
+        "isHomebrew": false,
+        "version": null,
+        "sourceId": null,
+        "sourcePageNumber": 230,
+        "requiresSavingThrow": false,
+        "requiresAttackRoll": false,
+        "atHigherLevels": {
+          "higherLevelDefinitions": [],
+          "additionalAttacks": [],
+          "additionalTargets": [],
+          "areaOfEffect": [],
+          "duration": [],
+          "creatures": [],
+          "special": [],
+          "points": [],
+          "range": []
+        },
+        "modifiers": [
+          {
+            "fixedValue": null,
+            "id": "spell_2056_73",
+            "entityId": null,
+            "entityTypeId": null,
+            "type": "bonus",
+            "subType": "hit-points",
+            "dice": null,
+            "restriction": "",
+            "statId": null,
+            "requiresAttunement": false,
+            "duration": null,
+            "friendlyTypeName": "Bonus",
+            "friendlySubtypeName": "Hit Points",
+            "isGranted": false,
+            "bonusTypes": [],
+            "value": null,
+            "availableToMulticlass": null,
+            "modifierTypeId": 0,
+            "modifierSubTypeId": 0,
+            "componentId": 0,
+            "componentTypeId": 0,
+            "die": {
+              "diceCount": 1,
+              "diceValue": 8,
+              "diceMultiplier": null,
+              "fixedValue": null,
+              "diceString": "1d8"
+            },
+            "count": 1,
+            "durationUnit": null,
+            "usePrimaryStat": true,
+            "atHigherLevels": {
+              "higherLevelDefinitions": [
+                {
+                  "level": 1,
+                  "typeId": 15,
+                  "dice": {
+                    "diceCount": 1,
+                    "diceValue": 8,
+                    "diceMultiplier": null,
+                    "fixedValue": 0,
+                    "diceString": "1d8"
+                  },
+                  "value": null,
+                  "details": ""
+                }
+              ],
+              "additionalAttacks": [],
+              "additionalTargets": [],
+              "areaOfEffect": [],
+              "duration": [],
+              "creatures": [],
+              "special": [],
+              "points": [],
+              "range": []
+            }
+          }
+        ],
+        "conditions": [],
+        "tags": [ "Healing" ],
+        "castingTimeDescription": "",
+        "scaleType": "spellscale",
+        "sources": [
+          {
+            "sourceId": 1,
+            "pageNumber": null,
+            "sourceType": 2
+          },
+          {
+            "sourceId": 2,
+            "pageNumber": 230,
+            "sourceType": 1
+          }
+        ],
+        "spellGroups": [ 1 ],
+        "isLegacy": true
+      },
+      "definitionId": 0,
+      "prepared": false,
+      "countsAsKnownSpell": false,
+      "usesSpellSlot": true,
+      "castAtLevel": null,
+      "alwaysPrepared": true,
+      "restriction": null,
+      "spellCastingAbilityId": null,
+      "displayAsAttack": null,
+      "additionalDescription": null,
+      "castOnlyAsRitual": false,
+      "ritualCastingType": null,
+      "range": {
+        "origin": "Touch",
+        "rangeValue": 0,
+        "aoeType": null,
+        "aoeValue": null
+      },
+      "activation": {
+        "activationTime": 1,
+        "activationType": 1
+      },
+      "baseLevelAtWill": false,
+      "atWillLimitedUseLevel": null,
+      "isSignatureSpell": null,
+      "componentId": 0,
+      "componentTypeId": 0,
+      "spellListId": null
+    },
+    {
+      "overrideSaveDc": null,
+      "limitedUse": null,
+      "id": 138788,
+      "entityTypeId": 435869154,
+      "definition": {
+        "id": 2263,
+        "definitionKey": "1118725998:2263",
+        "name": "Spiritual Weapon",
+        "level": 2,
+        "school": "Evocation",
+        "duration": {
+          "durationInterval": 1,
+          "durationUnit": "Minute",
+          "durationType": "Time"
+        },
+        "activation": {
+          "activationTime": 1,
+          "activationType": 3
+        },
+        "range": {
+          "origin": "Ranged",
+          "rangeValue": 60,
+          "aoeType": null,
+          "aoeValue": null
+        },
+        "asPartOfWeaponAttack": false,
+        "description": "<p>You create a floating, spectral weapon within range that lasts for the duration or until you cast this spell again. When you cast the spell, you can make a melee spell attack against a creature within 5 feet of the weapon. On a hit, the target takes force damage equal to 1d8 + your spellcasting ability modifier.</p>\r\n<p>As a bonus action on your turn, you can move the weapon up to 20 feet and repeat the attack against a creature within 5 feet of it.</p>\r\n<p>The weapon can take whatever form you choose. Clerics of deities who are associated with a particular weapon (as St. Cuthbert is known for his mace and Thor for his hammer) make this spell's effect resemble that weapon.</p>\r\n<p><em><strong>At Higher Levels.</strong></em> When you cast this spell using a spell slot of 3rd level or higher, the damage increases by 1d8 for every two slot levels above 2nd.</p>",
+        "snippet": "",
+        "concentration": false,
+        "ritual": false,
+        "rangeArea": null,
+        "damageEffect": null,
+        "components": [ 1, 2 ],
+        "componentsDescription": "",
+        "saveDcAbilityId": null,
+        "healing": null,
+        "healingDice": [],
+        "tempHpDice": [],
+        "attackType": 1,
+        "canCastAtHigherLevel": true,
+        "isHomebrew": false,
+        "version": null,
+        "sourceId": null,
+        "sourcePageNumber": 278,
+        "requiresSavingThrow": false,
+        "requiresAttackRoll": true,
+        "atHigherLevels": {
+          "higherLevelDefinitions": [],
+          "additionalAttacks": [],
+          "additionalTargets": [],
+          "areaOfEffect": [],
+          "duration": [],
+          "creatures": [],
+          "special": [],
+          "points": [],
+          "range": []
+        },
+        "modifiers": [
+          {
+            "fixedValue": null,
+            "id": "spell_2263_269",
+            "entityId": null,
+            "entityTypeId": null,
+            "type": "damage",
+            "subType": "force",
+            "dice": null,
+            "restriction": "",
+            "statId": null,
+            "requiresAttunement": false,
+            "duration": null,
+            "friendlyTypeName": "Damage",
+            "friendlySubtypeName": "Force",
+            "isGranted": false,
+            "bonusTypes": [],
+            "value": null,
+            "availableToMulticlass": null,
+            "modifierTypeId": 0,
+            "modifierSubTypeId": 0,
+            "componentId": 0,
+            "componentTypeId": 0,
+            "die": {
+              "diceCount": 1,
+              "diceValue": 8,
+              "diceMultiplier": null,
+              "fixedValue": null,
+              "diceString": "1d8"
+            },
+            "count": 1,
+            "durationUnit": null,
+            "usePrimaryStat": true,
+            "atHigherLevels": {
+              "higherLevelDefinitions": [
+                {
+                  "level": 2,
+                  "typeId": 15,
+                  "dice": {
+                    "diceCount": 1,
+                    "diceValue": 8,
+                    "diceMultiplier": null,
+                    "fixedValue": 0,
+                    "diceString": "1d8"
+                  },
+                  "value": null,
+                  "details": ""
+                }
+              ],
+              "additionalAttacks": [],
+              "additionalTargets": [],
+              "areaOfEffect": [],
+              "duration": [],
+              "creatures": [],
+              "special": [],
+              "points": [],
+              "range": []
+            }
+          }
+        ],
+        "conditions": [],
+        "tags": [ "Damage" ],
+        "castingTimeDescription": "",
+        "scaleType": "spellscale",
+        "sources": [
+          {
+            "sourceId": 1,
+            "pageNumber": null,
+            "sourceType": 2
+          },
+          {
+            "sourceId": 2,
+            "pageNumber": 278,
+            "sourceType": 1
+          }
+        ],
+        "spellGroups": [],
+        "isLegacy": true
+      },
+      "definitionId": 0,
+      "prepared": false,
+      "countsAsKnownSpell": false,
+      "usesSpellSlot": true,
+      "castAtLevel": null,
+      "alwaysPrepared": true,
+      "restriction": null,
+      "spellCastingAbilityId": null,
+      "displayAsAttack": null,
+      "additionalDescription": null,
+      "castOnlyAsRitual": false,
+      "ritualCastingType": null,
+      "range": {
+        "origin": "Ranged",
+        "rangeValue": 60,
+        "aoeType": null,
+        "aoeValue": null
+      },
+      "activation": {
+        "activationTime": 1,
+        "activationType": 3
+      },
+      "baseLevelAtWill": false,
+      "atWillLimitedUseLevel": null,
+      "isSignatureSpell": null,
+      "componentId": 0,
+      "componentTypeId": 0,
+      "spellListId": null
+    },
+    {
+      "overrideSaveDc": null,
+      "limitedUse": null,
+      "id": 138656,
+      "entityTypeId": 435869154,
+      "definition": {
+        "id": 2234,
+        "definitionKey": "1118725998:2234",
+        "name": "Revivify",
+        "level": 3,
+        "school": "Necromancy",
+        "duration": {
+          "durationInterval": 0,
+          "durationUnit": null,
+          "durationType": "Instantaneous"
+        },
+        "activation": {
+          "activationTime": 1,
+          "activationType": 1
+        },
+        "range": {
+          "origin": "Touch",
+          "rangeValue": 0,
+          "aoeType": null,
+          "aoeValue": null
+        },
+        "asPartOfWeaponAttack": false,
+        "description": "<p>You touch a creature that has died within the last minute. That creature returns to life with 1 hit point. This spell can't return to life a creature that has died of old age, nor can it restore any missing body parts.</p>",
+        "snippet": "",
+        "concentration": false,
+        "ritual": false,
+        "rangeArea": null,
+        "damageEffect": null,
+        "components": [ 1, 2, 3 ],
+        "componentsDescription": "diamonds worth 300 gp, which the spell consumes",
+        "saveDcAbilityId": null,
+        "healing": null,
+        "healingDice": [],
+        "tempHpDice": [],
+        "attackType": null,
+        "canCastAtHigherLevel": false,
+        "isHomebrew": false,
+        "version": null,
+        "sourceId": null,
+        "sourcePageNumber": 272,
+        "requiresSavingThrow": false,
+        "requiresAttackRoll": false,
+        "atHigherLevels": {
+          "higherLevelDefinitions": [],
+          "additionalAttacks": [],
+          "additionalTargets": [],
+          "areaOfEffect": [],
+          "duration": [],
+          "creatures": [],
+          "special": [],
+          "points": [],
+          "range": []
+        },
+        "modifiers": [
+          {
+            "fixedValue": null,
+            "id": "spell_2234_243",
+            "entityId": null,
+            "entityTypeId": null,
+            "type": "bonus",
+            "subType": "hit-points",
+            "dice": null,
+            "restriction": "Target creature that has died within the last minute",
+            "statId": null,
+            "requiresAttunement": false,
+            "duration": null,
+            "friendlyTypeName": "Bonus",
+            "friendlySubtypeName": "Hit Points",
+            "isGranted": false,
+            "bonusTypes": [],
+            "value": null,
+            "availableToMulticlass": null,
+            "modifierTypeId": 0,
+            "modifierSubTypeId": 0,
+            "componentId": 0,
+            "componentTypeId": 0,
+            "die": {
+              "diceCount": null,
+              "diceValue": null,
+              "diceMultiplier": null,
+              "fixedValue": 1,
+              "diceString": null
+            },
+            "count": 1,
+            "durationUnit": null,
+            "usePrimaryStat": false,
+            "atHigherLevels": {
+              "higherLevelDefinitions": [],
+              "additionalAttacks": [],
+              "additionalTargets": [],
+              "areaOfEffect": [],
+              "duration": [],
+              "creatures": [],
+              "special": [],
+              "points": [],
+              "range": []
+            }
+          }
+        ],
+        "conditions": [],
+        "tags": [ "Healing" ],
+        "castingTimeDescription": "",
+        "scaleType": null,
+        "sources": [
+          {
+            "sourceId": 1,
+            "pageNumber": null,
+            "sourceType": 2
+          },
+          {
+            "sourceId": 2,
+            "pageNumber": 272,
+            "sourceType": 1
+          }
+        ],
+        "spellGroups": [],
+        "isLegacy": true
+      },
+      "definitionId": 0,
+      "prepared": false,
+      "countsAsKnownSpell": false,
+      "usesSpellSlot": true,
+      "castAtLevel": null,
+      "alwaysPrepared": true,
+      "restriction": null,
+      "spellCastingAbilityId": null,
+      "displayAsAttack": null,
+      "additionalDescription": null,
+      "castOnlyAsRitual": false,
+      "ritualCastingType": null,
+      "range": {
+        "origin": "Touch",
+        "rangeValue": 0,
+        "aoeType": null,
+        "aoeValue": null
+      },
+      "activation": {
+        "activationTime": 1,
+        "activationType": 1
+      },
+      "baseLevelAtWill": false,
+      "atWillLimitedUseLevel": null,
+      "isSignatureSpell": null,
+      "componentId": 0,
+      "componentTypeId": 0,
+      "spellListId": null
+    }
+  ],
+  "pagination": null
+}

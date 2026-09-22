@@ -1,5 +1,4 @@
-﻿using CatsUdon.CharacterSheets.CCFolia;
-using CatsUdon.CharacterSheets.Adapters.Abstractions;
+﻿using CatsUdon.CharacterSheets.Adapters.Abstractions;
 using CatsUdon.CharacterSheets.CCFolia;
 using CatsUdon.CharacterSheets.Memo;
 using CatsUdon.CharacterSheets.TextSheets;
@@ -82,7 +81,7 @@ public partial class KillDeathBusinessAdapter(HttpClient httpClient) : ICharacte
             if (isEmpty) continue;
 
             var risk = abilitiesCount - index;
-            
+
             var abilityNameMatch = AbilityNameRegex.Match(ability.Name);
             if (!abilityNameMatch.Success)
             {

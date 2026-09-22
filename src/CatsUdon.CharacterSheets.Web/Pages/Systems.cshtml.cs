@@ -11,6 +11,6 @@ public class SystemsModel(IEnumerable<ICharacterSheetAdapter> adapters) : PageMo
     {
         SupportedSystems = adapters.SelectMany(adapter => adapter.SupportedGameSystems)
             .GroupBy(s => (s.ProviderName, s.ProviderHomePageUrl))
-            .ToArray(); 
+            .ToArray();
     }
 }

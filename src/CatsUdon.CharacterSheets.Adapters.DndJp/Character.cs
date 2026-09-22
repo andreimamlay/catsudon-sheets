@@ -1,6 +1,4 @@
-﻿using CatsUdon.CharacterSheets;
-
-namespace CatsUdon.CharacterSheets.Adapters.DndJp;
+﻿namespace CatsUdon.CharacterSheets.Adapters.DndJp;
 
 internal class Character
 {

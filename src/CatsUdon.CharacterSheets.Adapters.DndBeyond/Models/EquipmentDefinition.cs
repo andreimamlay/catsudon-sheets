@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
-
-namespace CatsUdon.CharacterSheets.Adapters.DndBeyond.Models;
+﻿namespace CatsUdon.CharacterSheets.Adapters.DndBeyond.Models;
 
 internal class EquipmentDefinition
 {
@@ -36,7 +31,7 @@ internal enum ArmorTypes
 internal enum AttackType
 {
     Melee = 1,
-    Ranged = 2
+    RangedOrSpell = 2
 }
 
 internal enum WeaponCategories

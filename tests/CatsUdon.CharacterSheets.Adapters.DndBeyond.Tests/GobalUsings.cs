@@ -1,0 +1,1 @@
+﻿global using CatsUdon.CharacterSheets.Adapters.DndBeyond.Tests.Fixtures;

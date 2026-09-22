@@ -15,6 +15,8 @@ internal class Character
     public int ArmorClass { get; set; }
     public int Inspiration { get; set; }
     public int PassivePerception { get; set; }
+    public int PassiveInvestigation { get; set; }
+    public int PassiveInsight { get; set; }
 
     public int StrengthScore { get; set; }
     public int StrengthModifier { get; set; }
@@ -67,6 +69,8 @@ internal class Attack
     public required string Name { get; set; }
     public int? Level { get; set; }
     public Modifier AttackBonus { get; set; }
+    public bool HideAttack { get; set; }
+    public bool CanNotCrit { get; set; }
     public Die Damage { get; set; }
 }
 
@@ -74,7 +78,7 @@ internal class Attack
 internal class SpellEffect
 {
     public required string Name { get; set; }
-    public int Level { get; set; }
+    public int? Level { get; set; }
     public Die Damage { get; set; }
     public StatIds? SpellSaveAbilityId { get; set; }
     public int? SpellSaveDc { get; set; }

@@ -1,7 +1,5 @@
 ﻿using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
-using CatsUdon.CharacterSheets;
-using CatsUdon.CharacterSheets.CCFolia;
 using CatsUdon.CharacterSheets.Adapters.Abstractions;
 using CatsUdon.CharacterSheets.CCFolia;
 using System.Text;
@@ -96,7 +94,7 @@ public partial class DndJpAdapter(HttpClient httpClient) : ICharacterSheetAdapte
             commands.AppendLine($"1d{character.HitDice.Value.Sides} ヒットダイスでHP回復（{character.HitDice.Value.Count}回まで）");
         }
 
-        if (character.Attacks.Count > 0) 
+        if (character.Attacks.Count > 0)
         {
             commands.AppendLine("=================  攻撃  ================");
             foreach (var attack in character.Attacks)
