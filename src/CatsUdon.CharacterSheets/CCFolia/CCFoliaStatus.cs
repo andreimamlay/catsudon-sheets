@@ -1,5 +1,9 @@
-﻿namespace CatsUdon.CharacterSheets.CCFolia;
+﻿using System.Diagnostics;
 
+namespace CatsUdon.CharacterSheets.CCFolia;
+
+
+[DebuggerDisplay("{Label} {Value} / {Max}")]
 public class CCFoliaStatus
 {
     public string Label { get; set; } = string.Empty;

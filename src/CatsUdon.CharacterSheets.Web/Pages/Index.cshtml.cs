@@ -7,7 +7,7 @@ namespace CatsUdon.CharacterSheets.Web.Pages;
 
 public class IndexModel(IEnumerable<ICharacterSheetAdapter> adapters, JsonSerializerOptions jsonSerializerOptions) : PageModel
 {
-    
+
 
     [BindProperty(Name = "url", SupportsGet = true)]
     public string? CharacterSheetUrl { get; set; }
@@ -56,5 +56,5 @@ public class IndexModel(IEnumerable<ICharacterSheetAdapter> adapters, JsonSerial
         }
     }
 
-    
+
 }

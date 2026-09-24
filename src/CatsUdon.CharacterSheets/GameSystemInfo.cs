@@ -1,4 +1,5 @@
-﻿namespace CatsUdon.CharacterSheets;
+﻿namespace CatsUdon.CharacterSheets.Adapters.Abstractions;
+
 public class GameSystemInfo
 {
     public required string ProviderName { get; set; }

@@ -1,15 +1,25 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 namespace CatsUdon.CharacterSheets;
+
+[DebuggerDisplay("{ToString()}")]
 public readonly partial struct Die
 {
     [GeneratedRegex(@"^(?<count>\d+)d(?<sides>\d+)(?<modifier>(\+|-)\d+)?$")]
     private static partial Regex DieRegex { get; }
 
-    public static bool TryParse(string input, [NotNullWhen(true)] out Die? die)
+    public static readonly Die Zero = new();
+
+    public static bool TryParse(string? input, [NotNullWhen(true)] out Die? die)
     {
         die = default;
+
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return false;
+        }
 
         var match = DieRegex.Match(input);
         if (!match.Success)
@@ -22,7 +32,7 @@ public readonly partial struct Die
         Modifier? modifier = match.Groups["modifier"].Success
             ? int.Parse(match.Groups["modifier"].Value)
             : default;
-        
+
         die = new Die()
         {
             Count = count,
@@ -32,7 +42,7 @@ public readonly partial struct Die
 
         return true;
     }
-    
+
     public int Count { get; init; }
     public int Sides { get; init; }
     public Modifier? Modifier { get; init; }
