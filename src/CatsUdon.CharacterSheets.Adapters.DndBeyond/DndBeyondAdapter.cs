@@ -8,9 +8,8 @@ namespace CatsUdon.CharacterSheets.Adapters.DndBeyond;
 
 internal partial class DndBeyondAdapter(IDndBeyondApiClient apiClient) : ICharacterSheetAdapter
 {
-    [GeneratedRegex(@"^https:\/\/www\.dndbeyond\.com\/characters\/(?<characterId>\d+)$")]
+    [GeneratedRegex(@"^https:\/\/www\.dndbeyond\.com\/characters\/(?<characterId>\d+)(\/.*)?$")]
     private static partial Regex UrlMatchRegex { get; }
-
 
     private static readonly Lazy<GameSystemInfo[]> supportedSystems = new([
         new GameSystemInfo()
@@ -99,9 +98,13 @@ internal partial class DndBeyondAdapter(IDndBeyondApiClient apiClient) : ICharac
         data.Params.Add(new CCFoliaParameter() { Label = "INT", Value = ToModifierString(character.IntelligenceModifier) });
         data.Params.Add(new CCFoliaParameter() { Label = "WIS", Value = ToModifierString(character.WisdomModifier) });
         data.Params.Add(new CCFoliaParameter() { Label = "CHA", Value = ToModifierString(character.CharismaModifier) });
-        data.Params.Add(new CCFoliaParameter() { Label = "Passive Perception", Value = ToModifierString(character.PassivePerception) });
-        data.Params.Add(new CCFoliaParameter() { Label = "Passive Investigation", Value = ToModifierString(character.PassiveInvestigation) });
-        data.Params.Add(new CCFoliaParameter() { Label = "Passive Insight", Value = ToModifierString(character.PassiveInsight) });
+
+        var memoBuilder = new StringBuilder();
+        memoBuilder.AppendLine($"Passive Perception {character.PassivePerception}");
+        memoBuilder.AppendLine($"Passive Investigation {character.PassiveInvestigation}");
+        memoBuilder.AppendLine($"Passive Insight {character.PassiveInsight}");
+
+        data.Memo = memoBuilder.Replace("\r\n", "\n").ToString().Trim();
 
         var commands = new StringBuilder();
         commands.AppendLine($"1d20{ToDiceModifierString(character.DexterityModifier)} Initiative");
@@ -121,26 +124,26 @@ internal partial class DndBeyondAdapter(IDndBeyondApiClient apiClient) : ICharac
 
                     if (attack.Level.HasValue)
                     {
-                        commands.AppendLine($"{attack.Damage} [{attack.Name}] [Slot {attack.Level}] Damage");
+                        commands.AppendLine($"{attack.Damage} [{attack.Name}] [Slot {attack.Level}] {Tags(attack.Tags)}Damage");
                         if (!attack.CanNotCrit)
                         {
                             var criticalDie = attack.Damage with
                             {
                                 Count = attack.Damage.Count * 2
                             };
-                            commands.AppendLine($"{criticalDie} [{attack.Name}] [Slot {attack.Level}] Critical");
+                            commands.AppendLine($"{criticalDie} [{attack.Name}] [Slot {attack.Level}] {Tags(attack.Tags)}Critical");
                         }
                     }
                     else
                     {
-                        commands.AppendLine($"{attack.Damage} [{attack.Name}] Damage");
+                        commands.AppendLine($"{attack.Damage} [{attack.Name}] {Tags(attack.Tags)}Damage");
                         if (!attack.CanNotCrit)
                         {
                             var criticalDie = attack.Damage with
                             {
                                 Count = attack.Damage.Count * 2
                             };
-                            commands.AppendLine($"{criticalDie} [{attack.Name}] Critical");
+                            commands.AppendLine($"{criticalDie} [{attack.Name}] {Tags(attack.Tags)}Critical");
                         }
                     }
                 }
@@ -166,12 +169,12 @@ internal partial class DndBeyondAdapter(IDndBeyondApiClient apiClient) : ICharac
         }
 
         commands.AppendLine("===========  Saving Throws  ==========");
-        commands.AppendLine($"1d20{ToDiceModifierString(character.StrengthSavingThrowModifier)} [STR] Saving throw");
-        commands.AppendLine($"1d20{ToDiceModifierString(character.DexteritySavingThrowModifier)} [DEX] Saving throw");
-        commands.AppendLine($"1d20{ToDiceModifierString(character.ConstitutionSavingThrowModifier)} [CON] Saving throw");
-        commands.AppendLine($"1d20{ToDiceModifierString(character.IntelligenceSavingThrowModifier)} [INT] Saving throw");
-        commands.AppendLine($"1d20{ToDiceModifierString(character.WisdomSavingThrowModifier)} [WIS] Saving throw");
-        commands.AppendLine($"1d20{ToDiceModifierString(character.CharismaSavingThrowModifier)} [CHA] Saving throw");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.StrengthSavingThrowModifier)} [Strength] Saving throw");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.DexteritySavingThrowModifier)} [Dexterity] Saving throw");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.ConstitutionSavingThrowModifier)} [Constitution] Saving throw");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.IntelligenceSavingThrowModifier)} [Intelligence] Saving throw");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.WisdomSavingThrowModifier)} [Wisdom] Saving throw");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.CharismaSavingThrowModifier)} [Charisma] Saving throw");
 
         commands.AppendLine("=============  Abilities  ===============");
         commands.AppendLine($"1d20{ToDiceModifierString(character.AcrobaticsModifier)} [Acrobatics] Ability check");
@@ -194,12 +197,12 @@ internal partial class DndBeyondAdapter(IDndBeyondApiClient apiClient) : ICharac
         commands.AppendLine($"1d20{ToDiceModifierString(character.SurvivalModifier)} [Survival] Ability check");
 
         commands.AppendLine("=============  Skills  ================");
-        commands.AppendLine($"1d20{ToDiceModifierString(character.StrengthModifier)} [STR] Skill check");
-        commands.AppendLine($"1d20{ToDiceModifierString(character.DexterityModifier)} [DEX] Skill check");
-        commands.AppendLine($"1d20{ToDiceModifierString(character.ConstitutionModifier)} [CON] Skill check");
-        commands.AppendLine($"1d20{ToDiceModifierString(character.IntelligenceModifier)} [INT] Skill check");
-        commands.AppendLine($"1d20{ToDiceModifierString(character.WisdomModifier)} [WIS] Skill check");
-        commands.AppendLine($"1d20{ToDiceModifierString(character.CharismaModifier)} [CHA] Skill check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.StrengthModifier)} [Strength] Skill check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.DexterityModifier)} [Dexterity] Skill check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.ConstitutionModifier)} [Constitution] Skill check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.IntelligenceModifier)} [Intelligence] Skill check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.WisdomModifier)} [Wisdom] Skill check");
+        commands.AppendLine($"1d20{ToDiceModifierString(character.CharismaModifier)} [Charisma] Skill check");
 
         ccfoliaCharacter.Data.Commands = commands.Replace("\r\n", "\n").ToString().Trim();
 
@@ -217,6 +220,12 @@ internal partial class DndBeyondAdapter(IDndBeyondApiClient apiClient) : ICharac
             0 => "",
             < 0 => $"{value}"
         };
+        string Tags(string[] tags)
+        {
+            if (tags.Length == 0) return string.Empty;
+
+            return $"[{String.Join(", ", tags)}] ";
+        }
     }
 
     private async Task ReadSpellEffects(CharacterData data, Character character)
@@ -595,6 +604,7 @@ internal partial class DndBeyondAdapter(IDndBeyondApiClient apiClient) : ICharac
                     character.Attacks.Add(new Attack()
                     {
                         Name = weapon.Definition.Name,
+                        Tags = ["2H"],
                         AttackBonus = new Modifier(attackBonus),
                         Damage = versatileDamageDie.Value with
                         {

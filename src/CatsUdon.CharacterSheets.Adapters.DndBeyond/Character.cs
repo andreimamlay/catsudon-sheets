@@ -72,6 +72,7 @@ internal class Attack
     public bool HideAttack { get; set; }
     public bool CanNotCrit { get; set; }
     public Die Damage { get; set; }
+    public string[] Tags { get; set; } = [];
 }
 
 [DebuggerDisplay("{Name} (DC {SpellSaveDc} {SpellSaveAbilityId}), {Damage} damage")]
